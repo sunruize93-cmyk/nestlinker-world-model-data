@@ -4,7 +4,7 @@
 
 ## 当前覆盖
 
-截至 2026-09-01，目录登记 30 个公开来源；首个可复核快照包含 6 个文件、9,935 条记录。覆盖数量、限制与下一批采集顺序见 `docs/COVERAGE.md`。
+截至 2026-09-01，目录登记 33 个公开来源；首个可复核快照包含 6 个文件、9,935 条记录。覆盖数量、限制与下一批采集顺序见 `docs/COVERAGE.md`。
 
 - 租赁成交：国土交通部 RTMS，按住宅类型、区、月份采集。
 - 人口与外国人：行政安全部居民人口、法务部登记/居所外国人统计。
@@ -20,15 +20,15 @@
 ## 快速使用
 
 ```bash
-python -m unittest discover -s tests -v
-python -m worldmodel_data validate
-python -m worldmodel_data catalog --category market
+python3 -m unittest discover -s tests -v
+python3 -m worldmodel_data validate
+python3 -m worldmodel_data catalog --category market
 ```
 
 从 NestLinker 主仓导入已有的公开数据派生快照：
 
 ```bash
-python -m worldmodel_data import-nestlinker \
+python3 -m worldmodel_data import-nestlinker \
   --source-root ../nestlinker-source \
   --snapshot-date 2026-09-01
 ```
@@ -37,7 +37,7 @@ python -m worldmodel_data import-nestlinker \
 
 ```bash
 export DATA_GO_KR_SERVICE_KEY='your-decoding-key'
-python -m worldmodel_data fetch-rtms --months 3 --seoul-only
+python3 -m worldmodel_data fetch-rtms --months 3 --seoul-only
 ```
 
 RTMS 原始响应写入 gitignore 的 `data/raw/`；经过最小化、去标识和字段标准化后，才能发布到 `data/snapshots/`。

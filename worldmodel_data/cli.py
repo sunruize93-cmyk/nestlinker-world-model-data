@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import shutil
+import subprocess
 import sys
-from datetime import datetime, timezone
+import tempfile
+from datetime import date, datetime, timezone
 from pathlib import Path
 
-from .manifest import file_entry, validate_snapshot
+from .manifest import file_entry, sha256_file, validate_snapshot
 from .rtms import fetch_rtms, rolling_months, service_key_from_env
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,10 +19,12 @@ CATALOG = ROOT / "catalog" / "datasets.json"
 
 SEED_FILES = {
     "data/public-housing/listings.json": (
-        "rtms-sample.json", "molit-rtms-rent", "https://www.data.go.kr/data/15126469/openapi.do"
+        "rtms-sample.json", "molit-rtms-rent", "https://www.data.go.kr/data/15126469/openapi.do",
+        ["molit-rtms-officetel-rent", "molit-rtms-single-multi-rent"]
     ),
     "data/public-housing/summaries.json": (
-        "rtms-summaries.json", "molit-rtms-rent", "https://www.data.go.kr/data/15126469/openapi.do"
+        "rtms-summaries.json", "molit-rtms-rent", "https://www.data.go.kr/data/15126469/openapi.do",
+        ["molit-rtms-officetel-rent", "molit-rtms-single-multi-rent"]
     ),
     "data/public-housing/demographics.json": (
         "demographics.json", "moj-foreign-residents", "https://www.immigration.go.kr/bbs/immigration/227/608718/artclView.do", ["mois-resident-population"]
@@ -33,6 +39,171 @@ SEED_FILES = {
         "korea-subway-stations.json", "korea-subway-cc0", "https://gist.github.com/nemorize/ac5f39ff62b6bf82dc496d10c69b2b46"
     ),
 }
+
+EXPECTED_INPUT_REPOSITORY = "https://github.com/sunruize93-cmyk/nest-linker"
+DEMOGRAPHIC_FIELDS = {
+    "guName", "lawdCode", "totalResidents", "koreanCount", "foreignCount",
+    "maleCount", "femaleCount", "age",
+}
+GOSIWON_FIELDS = {
+    "id", "name", "guName", "address", "roadAddress", "areaSqm", "floors", "reportedAt",
+}
+KOREAN_PHONE_PATTERN = (
+    r"(?<![0-9A-Za-z])(?:01[016789][ -]?\d{3,4}[ -]?\d{4}"
+    r"|0(?:2|[3-8]\d)[ -]?\d{3,4}[ -]?\d{4})(?![0-9A-Za-z])"
+)
+RTMS_SOURCE_BY_PROPERTY = {
+    "apartment": "molit-rtms-rent",
+    "officetel": "molit-rtms-officetel-rent",
+    "single_multi": "molit-rtms-single-multi-rent",
+    "rowhouse": "molit-rtms-rowhouse-rent",
+}
+
+
+def _git_value(source_root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(source_root), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def _validated_snapshot_date(value: str) -> str:
+    parsed = date.fromisoformat(value)
+    if parsed.isoformat() != value:
+        raise ValueError("snapshot date must be YYYY-MM-DD")
+    return value
+
+
+def _require_record_fields(records: object, allowed: set[str], label: str) -> list[dict]:
+    if not isinstance(records, list) or not records:
+        raise ValueError(f"{label}: expected a non-empty record list")
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            raise ValueError(f"{label}: record {index} must be an object")
+        unexpected = sorted(set(record) - allowed)
+        if unexpected:
+            raise ValueError(f"{label}: record {index} has unexpected fields: {unexpected}")
+    return records
+
+
+def sanitize_seed_file(path: Path) -> dict | list:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if path.name == "demographics.json":
+        if not isinstance(payload, dict) or payload.get("schemaVersion") != 1:
+            raise ValueError("demographics.json: invalid schema")
+        sources = payload.get("sources")
+        if not isinstance(sources, list) or not any("immigration.go.kr" in str(item.get("url")) for item in sources if isinstance(item, dict)):
+            raise ValueError("demographics.json: official source metadata missing")
+        districts = payload.get("districts")
+        if not isinstance(districts, list):
+            raise ValueError("demographics.json: districts missing")
+        for district in districts:
+            if not isinstance(district, dict):
+                raise ValueError("demographics.json: district must be an object")
+            district.pop("nationality", None)
+            district.pop("otherCountries", None)
+        _require_record_fields(districts, DEMOGRAPHIC_FIELDS, path.name)
+        payload["privacyTransform"] = "Removed district-level nationality breakdowns and rare cells."
+    elif path.name == "seoul-gosiwon-registry.json":
+        if not isinstance(payload, dict) or payload.get("sourcePage") != "https://www.data.go.kr/data/15030030/fileData.do":
+            raise ValueError("seoul-gosiwon-registry.json: official source metadata missing")
+        records = _require_record_fields(payload.get("listings"), GOSIWON_FIELDS, path.name)
+        for record in records:
+            for field in ("name", "address", "roadAddress"):
+                value = str(record.get(field) or "")
+                value = re.sub(
+                    rf"\([^()]*{KOREAN_PHONE_PATTERN}[^()]*\)",
+                    "[redacted-contact]",
+                    value,
+                )
+                value = re.sub(
+                    rf"[가-힣A-Za-z0-9]+[ :/]*{KOREAN_PHONE_PATTERN}",
+                    "[redacted-contact]",
+                    value,
+                )
+                record[field] = re.sub(
+                    KOREAN_PHONE_PATTERN, "[redacted-phone]", value
+                ).strip()
+            record["name"] = re.sub(r"\([^()]*대표[^()]*\)", "", record["name"]).strip()
+            record["roadAddress"] = re.sub(r"\s*대표자(?:\s*우편)?\s*\([^)]*\).*$", "", record["roadAddress"]).strip()
+            if re.search(r"대표자|귀하", f"{record['name']} {record['roadAddress']}"):
+                raise ValueError("seoul-gosiwon-registry.json: representative detail survived privacy transform")
+        payload["privacyTransform"] = "Removed phone-like values and representative names from free-text fields."
+    elif path.name in {"rtms-sample.json", "rtms-summaries.json"}:
+        if not isinstance(payload, dict) or payload.get("source") != "molit-rtms":
+            raise ValueError(f"{path.name}: RTMS source metadata missing")
+    elif path.name == "market-regions.json":
+        _require_record_fields(payload, {"lawdCode", "sido", "cityKey", "guName", "zh", "ko", "en", "lat", "lng"}, path.name)
+    elif path.name == "korea-subway-stations.json":
+        if not isinstance(payload, dict) or "CC0" not in str(payload.get("source")):
+            raise ValueError("korea-subway-stations.json: CC0 source metadata missing")
+    else:
+        raise ValueError(f"unsupported seed file: {path.name}")
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def snapshot_file_contract(name: str, payload: dict | list) -> dict:
+    common = {"data_label": "derived_observed"}
+    if name == "rtms-sample.json":
+        rows = payload["listings"]
+        dates = sorted(str(row["dealDate"]) for row in rows)
+        counts = {
+            property_type: sum(1 for row in rows if row.get("propertyType") == property_type)
+            for property_type in RTMS_SOURCE_BY_PROPERTY
+        }
+        composition = [
+            {"property_type": property_type, "source_id": RTMS_SOURCE_BY_PROPERTY[property_type], "record_count": count}
+            for property_type, count in counts.items() if count
+        ]
+        return {**common, "geography": "37 selected Korean districts", "temporal_coverage": {"start": dates[0], "end": dates[-1]}, "usage": "not_for_statistical_inference", "selection": "Latest 100 rows retained per district for UI and schema examples; truncated from 102,002 observed contracts.", "source_composition": composition, "limitations": ["Truncated recent sample; never estimate distributions, volume, availability, or future prices from this file."]}
+    if name == "rtms-summaries.json":
+        rows = payload["districts"]
+        starts = sorted(str(row["minDealDate"]) for row in rows if row.get("minDealDate"))
+        ends = sorted(str(row["maxDealDate"]) for row in rows if row.get("maxDealDate"))
+        counts = {
+            property_type: sum(int(row.get("byPropertyType", {}).get(property_type, {}).get("count", 0)) for row in rows)
+            for property_type in RTMS_SOURCE_BY_PROPERTY
+        }
+        composition = [
+            {"property_type": property_type, "source_id": RTMS_SOURCE_BY_PROPERTY[property_type], "record_count": count}
+            for property_type, count in counts.items() if count
+        ]
+        return {**common, "geography": "38 selected Korean districts", "temporal_coverage": {"start": starts[0], "end": ends[-1]}, "usage": "aggregate_market_baseline", "based_on_record_count": sum(int(row.get("count", 0)) for row in rows), "source_composition": composition, "limitations": ["Selected districts and short time window; historical contracts are not current inventory."]}
+    if name == "demographics.json":
+        return {**common, "geography": "93 Korean districts", "temporal_coverage": {"as_of": payload["vintage"]}, "usage": "aggregate_context_only", "limitations": ["Reference populations differ; nationality details were removed and foreign-resident counts must not score neighborhood suitability."]}
+    if name == "market-regions.json":
+        return {
+            **common,
+            "data_label": "curated_reference",
+            "geography": "93 Korean market-region join keys",
+            "temporal_coverage": {"as_of": "source repository commit"},
+            "usage": "join_keys_and_display_only_not_for_real_world_inference",
+            "field_provenance": [
+                {
+                    "fields": ["lawdCode", "sido", "guName"],
+                    "source_id": "mois-legal-dong-codes",
+                    "method": "official legal-dong join keys curated into the input repository",
+                },
+                {
+                    "fields": ["cityKey", "zh", "ko", "en", "lat", "lng"],
+                    "source": "versioned manual curation in the manifest input repository/file",
+                    "method": "display labels and approximate display centers; not official observations",
+                },
+            ],
+            "limitations": [
+                "Translations and coordinates are manually curated display metadata, not official observations.",
+                "Display centers are not boundaries, parcel coordinates, routing evidence, or model targets.",
+            ],
+        }
+    if name == "seoul-gosiwon-registry.json":
+        return {**common, "geography": "Seoul", "temporal_coverage": {"extracted_at": payload["extractedAt"]}, "usage": "registry_lookup_not_inventory_or_safety_certification", "limitations": ["Registration is not current vacancy, price, habitability, or a safety certification."]}
+    if name == "korea-subway-stations.json":
+        return {**common, "geography": "major Korean metro systems", "temporal_coverage": {"as_of": "2025-08-12 plus documented manual patches"}, "usage": "prototype_only_requires_official_validation", "limitations": ["Community coordinates and manual patches require operator validation before routing."]}
+    raise ValueError(f"missing file contract for {name}")
 
 
 def load_catalog() -> dict:
@@ -50,38 +221,60 @@ def command_catalog(args: argparse.Namespace) -> int:
 
 def command_import(args: argparse.Namespace) -> int:
     source_root = Path(args.source_root).expanduser().resolve()
-    snapshot_dir = ROOT / "data" / "snapshots" / args.snapshot_date / "initial-public-baseline"
-    if snapshot_dir.exists() and any(snapshot_dir.iterdir()) and not args.force:
-        raise SystemExit(f"snapshot already exists: {snapshot_dir}; pass --force to replace generated files")
-    snapshot_dir.mkdir(parents=True, exist_ok=True)
-    entries = []
-    for relative, seed in SEED_FILES.items():
-        target_name, source_id, source_url, *rest = seed
-        secondary_source_ids = rest[0] if rest else None
-        source = source_root / relative
-        if not source.is_file():
-            raise SystemExit(f"missing seed file: {source}")
-        target = snapshot_dir / target_name
-        shutil.copy2(source, target)
-        entries.append(
-            file_entry(target, snapshot_dir, source_id, source_url, secondary_source_ids)
-        )
-    manifest = {
-        "schema_version": 1,
-        "snapshot_id": f"initial-public-baseline-{args.snapshot_date}",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "data_label": "observed_and_derived_observed",
-        "geography": "Korea market regions with a Seoul-first product focus",
-        "derivation": "Imported from NestLinker public-data artifacts; no partner listing or user data included.",
-        "limitations": [
-            "RTMS rows are historical contracts, not currently available listings.",
-            "Demographic statistics have different reference populations and dates.",
-            "Gosiwon fire registration is not a safety certification or vacancy signal.",
-            "Community subway coordinates require official validation for production routing."
-        ],
-        "files": entries,
-    }
-    (snapshot_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    snapshot_date = _validated_snapshot_date(args.snapshot_date)
+    snapshot_parent = ROOT / "data" / "snapshots" / snapshot_date
+    snapshot_dir = snapshot_parent / "initial-public-baseline"
+    if snapshot_dir.exists():
+        raise SystemExit(f"published snapshot is immutable: {snapshot_dir}")
+    input_commit = _git_value(source_root, "rev-parse", "HEAD")
+    input_remote = _git_value(source_root, "remote", "get-url", "origin").removesuffix(".git")
+    if input_remote != EXPECTED_INPUT_REPOSITORY:
+        raise SystemExit(f"unexpected input repository: {input_remote}")
+    seed_paths = list(SEED_FILES)
+    if _git_value(source_root, "status", "--porcelain", "--", *seed_paths):
+        raise SystemExit("input data files differ from the recorded Git commit")
+    snapshot_parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".initial-public-baseline-", dir=snapshot_parent) as staging:
+        staging_dir = Path(staging)
+        entries = []
+        input_files = []
+        for relative, seed in SEED_FILES.items():
+            target_name, source_id, source_url, *rest = seed
+            secondary_source_ids = rest[0] if rest else None
+            source = source_root / relative
+            if not source.is_file() or source.is_symlink():
+                raise SystemExit(f"missing or unsafe seed file: {source}")
+            input_files.append({"path": relative, "sha256": sha256_file(source)})
+            target = staging_dir / target_name
+            shutil.copy2(source, target)
+            payload = sanitize_seed_file(target)
+            entry = file_entry(target, staging_dir, source_id, source_url, secondary_source_ids)
+            entry.update(snapshot_file_contract(target_name, payload))
+            entries.append(entry)
+        manifest = {
+            "schema_version": 1,
+            "snapshot_id": f"initial-public-baseline-{snapshot_date}",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "data_label": "observed_derived_and_curated",
+            "geography": "Korea market regions with a Seoul-first product focus",
+            "derivation": "Imported from committed NestLinker public-data artifacts, preserved curated display metadata as non-observational, and passed schema/privacy transforms; no partner listing or user data included.",
+            "input_repository": EXPECTED_INPUT_REPOSITORY,
+            "input_commit": input_commit,
+            "input_files": input_files,
+            "transformation": {
+                "command": f"python3 -m worldmodel_data import-nestlinker --source-root <repo> --snapshot-date {snapshot_date}",
+                "version": "worldmodel-data-v1"
+            },
+            "limitations": [
+                "RTMS rows are historical contracts, not currently available listings.",
+                "Demographic statistics have different reference populations and dates.",
+                "Gosiwon fire registration is not a safety certification or vacancy signal.",
+                "Community subway coordinates require official validation for production routing."
+            ],
+            "files": entries,
+        }
+        (staging_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        os.replace(staging_dir, snapshot_dir)
     print(snapshot_dir)
     return 0
 
@@ -111,7 +304,7 @@ def command_validate(_: argparse.Namespace) -> int:
     manifests = sorted(snapshots_root.glob("*/*/manifest.json")) if snapshots_root.exists() else []
     if not manifests:
         errors.append("data/snapshots: no snapshot manifests found")
-    known = {str(value) for value in ids}
+    known = {str(item["id"]): item for item in datasets if isinstance(item, dict) and item.get("id")}
     for manifest in manifests:
         errors.extend(validate_snapshot(manifest.parent, known))
     if errors:
@@ -127,7 +320,8 @@ def command_fetch_rtms(args: argparse.Namespace) -> int:
     if not key:
         raise SystemExit("DATA_GO_KR_SERVICE_KEY is not set")
     if args.seoul_only:
-        regions = json.loads((ROOT / "data" / "snapshots" / args.region_snapshot / "initial-public-baseline" / "market-regions.json").read_text(encoding="utf-8"))
+        region_snapshot = _validated_snapshot_date(args.region_snapshot)
+        regions = json.loads((ROOT / "data" / "snapshots" / region_snapshot / "initial-public-baseline" / "market-regions.json").read_text(encoding="utf-8"))
         lawd_codes = [str(item["lawdCode"]) for item in regions if item.get("sido") == "서울특별시"]
     else:
         lawd_codes = args.lawd
@@ -153,7 +347,6 @@ def parser() -> argparse.ArgumentParser:
     importer = sub.add_parser("import-nestlinker", help="import existing provenance-safe public snapshots")
     importer.add_argument("--source-root", required=True)
     importer.add_argument("--snapshot-date", required=True)
-    importer.add_argument("--force", action="store_true")
     importer.set_defaults(handler=command_import)
     validate = sub.add_parser("validate", help="validate catalog and snapshot hashes")
     validate.set_defaults(handler=command_validate)

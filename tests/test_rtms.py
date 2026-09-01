@@ -1,7 +1,14 @@
 import unittest
 from datetime import date
 
-from worldmodel_data.rtms import normalize_item, parse_xml_items, rolling_months
+from worldmodel_data.rtms import (
+    PATHS,
+    SOURCE_IDS,
+    SOURCE_LANDING_URLS,
+    normalize_item,
+    parse_xml_items,
+    rolling_months,
+)
 
 
 SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
@@ -31,6 +38,22 @@ class RtmsTests(unittest.TestCase):
             rolling_months(0)
         with self.assertRaises(ValueError):
             rolling_months(61)
+
+    def test_identity_preserves_source_and_row_multiplicity(self):
+        items, _, _ = parse_xml_items(SAMPLE)
+        apartment = normalize_item("apartment", items[0], "11620", 0)
+        same_after_repagination = normalize_item("apartment", dict(items[0]), "11620", 0)
+        officetel = normalize_item("officetel", items[0], "11620", 0)
+        second_contract = normalize_item("apartment", items[0], "11620", 1)
+        assert apartment and same_after_repagination and officetel and second_contract
+        self.assertEqual(apartment["id"], same_after_repagination["id"])
+        self.assertNotEqual(apartment["id"], officetel["id"])
+        self.assertNotEqual(apartment["id"], second_contract["id"])
+
+    def test_each_property_endpoint_has_independent_provenance(self):
+        self.assertEqual(set(PATHS), set(SOURCE_IDS))
+        self.assertEqual(set(PATHS), set(SOURCE_LANDING_URLS))
+        self.assertEqual(len(set(SOURCE_IDS.values())), len(PATHS))
 
 
 if __name__ == "__main__":

@@ -16771,7 +16771,7 @@
       "name": "송스45",
       "guName": "광진구",
       "address": "서울특별시 광진구 화양동 19-45 번지",
-      "roadAddress": "광나루로16길 22-3  수신기 1층/위탁관리 라인비엔텍 031-765-2565",
+      "roadAddress": "광나루로16길 22-3  수신기 1층/위탁관리 [redacted-contact]",
       "areaSqm": 488.76,
       "floors": "지상 2,3,4,5층",
       "reportedAt": "2013-03-12"
@@ -17461,7 +17461,7 @@
       "name": "하우스건대",
       "guName": "광진구",
       "address": "서울특별시 광진구 자양동  223-4 번지",
-      "roadAddress": "아차산로 324-0 태평빌딩 대성고시원 02-454-0039",
+      "roadAddress": "아차산로 324-0 태평빌딩 [redacted-contact]",
       "areaSqm": 308.64,
       "floors": "지상 4층",
       "reportedAt": "2011-11-08"
@@ -18620,7 +18620,7 @@
       "id": "gw-5aed1499e6f2af1b80b8",
       "name": "썬고시원",
       "guName": "구로구",
-      "address": "서울특별시 구로구 개봉동 198-31 (박미선 :02-354-7037) 번지 (박미선 :02-354-7037)",
+      "address": "서울특별시 구로구 개봉동 198-31 [redacted-contact] 번지 [redacted-contact]",
       "roadAddress": "개봉로20길 91-16",
       "areaSqm": 246.15,
       "floors": "지상 2,3,4층",
@@ -23141,7 +23141,7 @@
       "name": "라엘스테이",
       "guName": "동대문구",
       "address": "서울특별시 동대문구 청량리동  234-2 번지",
-      "roadAddress": "약령시로21길 30-0 현대아파트 대표자 우편(허영수 102호 귀하)",
+      "roadAddress": "약령시로21길 30-0 현대아파트",
       "areaSqm": 294,
       "floors": "지상 3층",
       "reportedAt": "2011-02-07"
@@ -24161,7 +24161,7 @@
       "name": "안동권씨대종원(4층)",
       "guName": "동대문구",
       "address": "서울특별시 동대문구 용두동 102-196 번지",
-      "roadAddress": "왕산로22길 11-0 송촌빌딩 별관 권정달 02-749-1815",
+      "roadAddress": "왕산로22길 11-0 송촌빌딩 별관 [redacted-contact]",
       "areaSqm": 141.3,
       "floors": "지상 4층",
       "reportedAt": "2011-11-28"
@@ -30551,7 +30551,7 @@
       "name": "유성고시텔",
       "guName": "마포구",
       "address": "서울특별시 마포구 서교동 335-34 번지",
-      "roadAddress": "와우산로29나길 14-3 대표자(황인경)",
+      "roadAddress": "와우산로29나길 14-3",
       "areaSqm": 374.83,
       "floors": "지상 1,2,3층",
       "reportedAt": "2010-08-09"
@@ -44718,7 +44718,7 @@
     },
     {
       "id": "gw-7f88b16221593bcbba69",
-      "name": "토마토하우스(최대현대표)",
+      "name": "토마토하우스",
       "guName": "영등포구",
       "address": "서울특별시 영등포구 영등포동1가  51-0 번지",
       "roadAddress": "경인로114나길 3-0  지하1~지상6",
@@ -47490,7 +47490,7 @@
       "id": "gw-374b53ef462792c214cf",
       "name": "미솜하우스",
       "guName": "종로구",
-      "address": "서울특별시 종로구 관철동 43-13 01022143709 번지 01022143709",
+      "address": "서울특별시 종로구 관철동 43-13 [redacted-phone] 번지 [redacted-phone]",
       "roadAddress": "종로8길 17-0",
       "areaSqm": 253.77,
       "floors": "지상 5,6층",
@@ -51326,5 +51326,6 @@
       "floors": "지상 2층",
       "reportedAt": "2010-12-15"
     }
-  ]
+  ],
+  "privacyTransform": "Removed phone-like values and representative names from free-text fields."
 }

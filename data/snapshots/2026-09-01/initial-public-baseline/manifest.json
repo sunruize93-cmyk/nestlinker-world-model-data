@@ -1,10 +1,42 @@
 {
   "schema_version": 1,
   "snapshot_id": "initial-public-baseline-2026-09-01",
-  "created_at": "2026-09-01T12:16:21.963945+00:00",
-  "data_label": "observed_and_derived_observed",
+  "created_at": "2026-09-01T12:44:50.152208+00:00",
+  "data_label": "observed_derived_and_curated",
   "geography": "Korea market regions with a Seoul-first product focus",
-  "derivation": "Imported from NestLinker public-data artifacts; no partner listing or user data included.",
+  "derivation": "Imported from committed NestLinker public-data artifacts, preserved curated display metadata as non-observational, and passed schema/privacy transforms; no partner listing or user data included.",
+  "input_repository": "https://github.com/sunruize93-cmyk/nest-linker",
+  "input_commit": "6c3401414c8dbb46055437648a560640b7d86f95",
+  "input_files": [
+    {
+      "path": "data/public-housing/listings.json",
+      "sha256": "73b60155389d6c362cbedbeb57604ce553eba6dde75c76cb4f2800d869b00403"
+    },
+    {
+      "path": "data/public-housing/summaries.json",
+      "sha256": "9abcdbd52a85ab715c3d52b19076c38baf92714cafc1c590ad843ec50931227d"
+    },
+    {
+      "path": "data/public-housing/demographics.json",
+      "sha256": "fe6679b8df70d1ea8139c299047cd51ef388498b475e81e6cb6e68b7d93a5afe"
+    },
+    {
+      "path": "data/public-housing/market-regions.json",
+      "sha256": "db7ce46ea6d58ef1936d4493aaac2e227dfb5e5d88afcb495165b17854d176ff"
+    },
+    {
+      "path": "data/gosiwon/listings.json",
+      "sha256": "91b8fd052b9be39138d919541a0f8ca0f49104ecb9d4d956ec374aaf669d7b6e"
+    },
+    {
+      "path": "data/koreaSubway/catalog.json",
+      "sha256": "de428a9fb773c2ce66b04b479e904c5b1f53227522f85dc5472d9cd1c2ca73b9"
+    }
+  ],
+  "transformation": {
+    "command": "python3 -m worldmodel_data import-nestlinker --source-root <repo> --snapshot-date 2026-09-01",
+    "version": "worldmodel-data-v1"
+  },
   "limitations": [
     "RTMS rows are historical contracts, not currently available listings.",
     "Demographic statistics have different reference populations and dates.",
@@ -16,52 +48,165 @@
       "path": "rtms-sample.json",
       "source_id": "molit-rtms-rent",
       "source_url": "https://www.data.go.kr/data/15126469/openapi.do",
-      "sha256": "73b60155389d6c362cbedbeb57604ce553eba6dde75c76cb4f2800d869b00403",
-      "bytes": 1229903,
-      "record_count": 3700
+      "secondary_source_ids": [
+        "molit-rtms-officetel-rent",
+        "molit-rtms-single-multi-rent"
+      ],
+      "sha256": "0e3a3e67a2ddb792215225a86857b121694dcd414498aaba4edef8a07ec58a02",
+      "bytes": 1681408,
+      "record_count": 3700,
+      "data_label": "derived_observed",
+      "geography": "37 selected Korean districts",
+      "temporal_coverage": {
+        "start": "2026-07-31",
+        "end": "2026-08-14"
+      },
+      "usage": "not_for_statistical_inference",
+      "selection": "Latest 100 rows retained per district for UI and schema examples; truncated from 102,002 observed contracts.",
+      "source_composition": [
+        {
+          "property_type": "apartment",
+          "source_id": "molit-rtms-rent",
+          "record_count": 2067
+        },
+        {
+          "property_type": "officetel",
+          "source_id": "molit-rtms-officetel-rent",
+          "record_count": 729
+        },
+        {
+          "property_type": "single_multi",
+          "source_id": "molit-rtms-single-multi-rent",
+          "record_count": 904
+        }
+      ],
+      "limitations": [
+        "Truncated recent sample; never estimate distributions, volume, availability, or future prices from this file."
+      ]
     },
     {
       "path": "rtms-summaries.json",
       "source_id": "molit-rtms-rent",
       "source_url": "https://www.data.go.kr/data/15126469/openapi.do",
-      "sha256": "9abcdbd52a85ab715c3d52b19076c38baf92714cafc1c590ad843ec50931227d",
-      "bytes": 40123,
-      "record_count": 38
+      "secondary_source_ids": [
+        "molit-rtms-officetel-rent",
+        "molit-rtms-single-multi-rent"
+      ],
+      "sha256": "895d18dc554cf8b7963c165619aa83c44e5da513634e39cd20c285e56c927747",
+      "bytes": 61503,
+      "record_count": 38,
+      "data_label": "derived_observed",
+      "geography": "38 selected Korean districts",
+      "temporal_coverage": {
+        "start": "2026-06-01",
+        "end": "2026-08-14"
+      },
+      "usage": "aggregate_market_baseline",
+      "based_on_record_count": 102002,
+      "source_composition": [
+        {
+          "property_type": "apartment",
+          "source_id": "molit-rtms-rent",
+          "record_count": 52373
+        },
+        {
+          "property_type": "officetel",
+          "source_id": "molit-rtms-officetel-rent",
+          "record_count": 20754
+        },
+        {
+          "property_type": "single_multi",
+          "source_id": "molit-rtms-single-multi-rent",
+          "record_count": 28875
+        }
+      ],
+      "limitations": [
+        "Selected districts and short time window; historical contracts are not current inventory."
+      ]
     },
     {
       "path": "demographics.json",
       "source_id": "moj-foreign-residents",
       "source_url": "https://www.immigration.go.kr/bbs/immigration/227/608718/artclView.do",
+      "sha256": "2fbfd19c8c172700100502cc6d6c86e3f0f91ea8a01a81fe2fa08c944b769e2f",
+      "bytes": 34095,
       "secondary_source_ids": [
         "mois-resident-population"
       ],
-      "sha256": "fe6679b8df70d1ea8139c299047cd51ef388498b475e81e6cb6e68b7d93a5afe",
-      "bytes": 582420,
-      "record_count": 93
+      "record_count": 93,
+      "data_label": "derived_observed",
+      "geography": "93 Korean districts",
+      "temporal_coverage": {
+        "as_of": "2026-06-30"
+      },
+      "usage": "aggregate_context_only",
+      "limitations": [
+        "Reference populations differ; nationality details were removed and foreign-resident counts must not score neighborhood suitability."
+      ]
     },
     {
       "path": "market-regions.json",
       "source_id": "mois-legal-dong-codes",
       "source_url": "https://www.data.go.kr/data/15077871/openapi.do",
-      "sha256": "db7ce46ea6d58ef1936d4493aaac2e227dfb5e5d88afcb495165b17854d176ff",
-      "bytes": 18553,
-      "record_count": 93
+      "sha256": "42e842e96797ac157c119d7610d40617e162203a95ff37d7786d333e20a44860",
+      "bytes": 22074,
+      "record_count": 93,
+      "data_label": "curated_reference",
+      "geography": "93 Korean market-region join keys",
+      "temporal_coverage": {
+        "as_of": "source repository commit"
+      },
+      "usage": "join_keys_and_display_only_not_for_real_world_inference",
+      "field_provenance": [
+        {
+          "fields": ["lawdCode", "sido", "guName"],
+          "source_id": "mois-legal-dong-codes",
+          "method": "official legal-dong join keys curated into the input repository"
+        },
+        {
+          "fields": ["cityKey", "zh", "ko", "en", "lat", "lng"],
+          "source": "versioned manual curation in the manifest input repository/file",
+          "method": "display labels and approximate display centers; not official observations"
+        }
+      ],
+      "limitations": [
+        "Translations and coordinates are manually curated display metadata, not official observations.",
+        "Display centers are not boundaries, parcel coordinates, routing evidence, or model targets."
+      ]
     },
     {
       "path": "seoul-gosiwon-registry.json",
       "source_id": "seoul-gosiwon-fire-registry",
       "source_url": "https://www.data.go.kr/data/15030030/fileData.do",
-      "sha256": "91b8fd052b9be39138d919541a0f8ca0f49104ecb9d4d956ec374aaf669d7b6e",
-      "bytes": 1734940,
-      "record_count": 5132
+      "sha256": "630976a4fc49c96bb035a92cd67d5824a7af214015046c22cc8bf9d0dc410e52",
+      "bytes": 1734935,
+      "record_count": 5132,
+      "data_label": "derived_observed",
+      "geography": "Seoul",
+      "temporal_coverage": {
+        "extracted_at": "2026-08-17T06:35:15.294Z"
+      },
+      "usage": "registry_lookup_not_inventory_or_safety_certification",
+      "limitations": [
+        "Registration is not current vacancy, price, habitability, or a safety certification."
+      ]
     },
     {
       "path": "korea-subway-stations.json",
       "source_id": "korea-subway-cc0",
       "source_url": "https://gist.github.com/nemorize/ac5f39ff62b6bf82dc496d10c69b2b46",
-      "sha256": "de428a9fb773c2ce66b04b479e904c5b1f53227522f85dc5472d9cd1c2ca73b9",
-      "bytes": 54139,
-      "record_count": 879
+      "sha256": "4666f9eaa720fbd5631fa1ec1c6f5f0c2b7721387a1d970b8cd59209224d0e26",
+      "bytes": 119817,
+      "record_count": 879,
+      "data_label": "derived_observed",
+      "geography": "major Korean metro systems",
+      "temporal_coverage": {
+        "as_of": "2025-08-12 plus documented manual patches"
+      },
+      "usage": "prototype_only_requires_official_validation",
+      "limitations": [
+        "Community coordinates and manual patches require operator validation before routing."
+      ]
     }
   ]
 }
