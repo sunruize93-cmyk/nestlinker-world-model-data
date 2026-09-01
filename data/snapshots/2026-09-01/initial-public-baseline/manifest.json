@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "initial-public-baseline-2026-09-01",
+  "created_at": "2026-09-01T12:16:21.963945+00:00",
+  "data_label": "observed_and_derived_observed",
+  "geography": "Korea market regions with a Seoul-first product focus",
+  "derivation": "Imported from NestLinker public-data artifacts; no partner listing or user data included.",
+  "limitations": [
+    "RTMS rows are historical contracts, not currently available listings.",
+    "Demographic statistics have different reference populations and dates.",
+    "Gosiwon fire registration is not a safety certification or vacancy signal.",
+    "Community subway coordinates require official validation for production routing."
+  ],
+  "files": [
+    {
+      "path": "rtms-sample.json",
+      "source_id": "molit-rtms-rent",
+      "source_url": "https://www.data.go.kr/data/15126469/openapi.do",
+      "sha256": "73b60155389d6c362cbedbeb57604ce553eba6dde75c76cb4f2800d869b00403",
+      "bytes": 1229903,
+      "record_count": 3700
+    },
+    {
+      "path": "rtms-summaries.json",
+      "source_id": "molit-rtms-rent",
+      "source_url": "https://www.data.go.kr/data/15126469/openapi.do",
+      "sha256": "9abcdbd52a85ab715c3d52b19076c38baf92714cafc1c590ad843ec50931227d",
+      "bytes": 40123,
+      "record_count": 38
+    },
+    {
+      "path": "demographics.json",
+      "source_id": "moj-foreign-residents",
+      "source_url": "https://www.immigration.go.kr/bbs/immigration/227/608718/artclView.do",
+      "secondary_source_ids": [
+        "mois-resident-population"
+      ],
+      "sha256": "fe6679b8df70d1ea8139c299047cd51ef388498b475e81e6cb6e68b7d93a5afe",
+      "bytes": 582420,
+      "record_count": 93
+    },
+    {
+      "path": "market-regions.json",
+      "source_id": "mois-legal-dong-codes",
+      "source_url": "https://www.data.go.kr/data/15077871/openapi.do",
+      "sha256": "db7ce46ea6d58ef1936d4493aaac2e227dfb5e5d88afcb495165b17854d176ff",
+      "bytes": 18553,
+      "record_count": 93
+    },
+    {
+      "path": "seoul-gosiwon-registry.json",
+      "source_id": "seoul-gosiwon-fire-registry",
+      "source_url": "https://www.data.go.kr/data/15030030/fileData.do",
+      "sha256": "91b8fd052b9be39138d919541a0f8ca0f49104ecb9d4d956ec374aaf669d7b6e",
+      "bytes": 1734940,
+      "record_count": 5132
+    },
+    {
+      "path": "korea-subway-stations.json",
+      "source_id": "korea-subway-cc0",
+      "source_url": "https://gist.github.com/nemorize/ac5f39ff62b6bf82dc496d10c69b2b46",
+      "sha256": "de428a9fb773c2ce66b04b479e904c5b1f53227522f85dc5472d9cd1c2ca73b9",
+      "bytes": 54139,
+      "record_count": 879
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nestlinker-world-model-data"
+version = "0.1.0"
+description = "Reproducible, provenance-first public data for Korea foreign-renter decision modeling"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+[project.scripts]
+nestlinker-data = "worldmodel_data.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["worldmodel_data*"]
