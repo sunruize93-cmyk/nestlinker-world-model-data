@@ -11,7 +11,7 @@ v0 已跑通，但结论仅为 **机制可运行、尚未校准**。它能把真
 - `run_minimum_world_model(market_payload, scenario)`：运行单一情景。
 - `run_scenario_matrix(market_payload, specification)`：排序情景、为相同市场分配共同随机流并生成确定性报告。
 
-CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 manifest、schema 与哈希，并只接受 `seoul-rental-price-files / derived_observed / historical_time_sliced_distribution`，再读取情景文件。输出同时绑定数据文件 SHA-256、manifest SHA-256、manifest 输入 commit、情景文件 SHA-256 和模型代码 SHA-256。
+CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 manifest、schema 与哈希，并只接受 `seoul-rental-price-files / derived_observed / historical_time_sliced_distribution`，再读取情景文件。输出同时绑定数据文件 SHA-256、manifest SHA-256、manifest 输入 commit、删除全部调用者 ID 后的规范化情景规格 SHA-256 和模型代码 SHA-256；原始情景文件哈希不会进入公开结果。
 
 ## 状态与标签
 

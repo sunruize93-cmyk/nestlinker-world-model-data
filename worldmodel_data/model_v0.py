@@ -409,3 +409,23 @@ def run_scenario_matrix(
             "Historical aggregate price bands do not represent current inventory.",
         ],
     }
+
+
+def scenario_specification_sha256(specification: Mapping[str, object]) -> str:
+    """Hash model-relevant scenario content without caller-provided identifiers."""
+    sanitized = deepcopy(specification)
+    scenarios = sanitized.get("scenarios")
+    if not isinstance(scenarios, list):
+        raise ValueError("scenario matrix requires a scenarios list")
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            raise ValueError("every matrix scenario must be an object")
+        scenario.pop("scenarioId", None)
+    sanitized["scenarios"] = sorted(
+        scenarios,
+        key=lambda value: json.dumps(
+            value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ),
+    )
+    canonical = json.dumps(sanitized, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

@@ -12,7 +12,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .manifest import file_entry, sha256_file, validate_snapshot
-from .model_v0 import run_scenario_matrix
+from .model_v0 import run_scenario_matrix, scenario_specification_sha256
 from .replay import as_receipt_filter_counterfactual, audit_replay_inputs, run_historical_replay
 from .rtms import fetch_rtms, rolling_months, service_key_from_env
 from .seoul_rents import build_monthly_aggregates, load_acquisition_ledger, publish_monthly_snapshot
@@ -522,7 +522,7 @@ def command_minimum_world_model(args: argparse.Namespace) -> int:
         "inputDataSha256": sha256_file(market_path),
         "inputManifestSha256": sha256_file(snapshot_dir / "manifest.json"),
         "inputCommit": manifest["input_commit"],
-        "scenarioFileSha256": sha256_file(scenario_file),
+        "scenarioSpecificationSha256": scenario_specification_sha256(specification),
         "modelCodeSha256": sha256_file(ROOT / "worldmodel_data" / "model_v0.py"),
     })
     output.parent.mkdir(parents=True, exist_ok=True)

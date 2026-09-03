@@ -248,14 +248,28 @@ class MinimumWorldModelTests(unittest.TestCase):
             ])
             result = json.loads(output.read_text(encoding="utf-8"))
 
+            renamed_spec = deepcopy(spec)
+            renamed_spec["scenarios"][0]["scenarioId"] = "renamed-cli-case"
+            renamed_file = Path(directory) / "renamed-scenarios.json"
+            renamed_output = Path(directory) / "renamed-result.json"
+            renamed_file.write_text(json.dumps(renamed_spec, ensure_ascii=False), encoding="utf-8")
+            main([
+                "minimum-world-model",
+                "--snapshot-dir", str(snapshot),
+                "--scenario-file", str(renamed_file),
+                "--output", str(renamed_output),
+            ])
+            renamed_result = json.loads(renamed_output.read_text(encoding="utf-8"))
+
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["inputSnapshot"], "seoul-rental-history-2026-09-03")
         self.assertEqual(result["scenarioCount"], 1)
         self.assertEqual(len(result["inputDataSha256"]), 64)
         self.assertEqual(len(result["inputManifestSha256"]), 64)
         self.assertEqual(len(result["inputCommit"]), 40)
-        self.assertEqual(len(result["scenarioFileSha256"]), 64)
+        self.assertEqual(len(result["scenarioSpecificationSha256"]), 64)
         self.assertEqual(len(result["modelCodeSha256"]), 64)
+        self.assertEqual(result, renamed_result)
 
     def test_published_reference_matrix_is_exactly_replayable(self):
         snapshot = ROOT / "data/snapshots/2026-09-03/seoul-rental-history"
