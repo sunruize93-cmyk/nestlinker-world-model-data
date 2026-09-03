@@ -14,7 +14,7 @@
   "results": [
     {
       "schemaVersion": 1,
-      "scenarioId": "gwanak-high-budget-1w-missing-terms",
+      "scenarioRef": "scenario-f481c4617c53fc2f",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "use_bounded_temporary_housing_and_verify",
       "requiredActions": [
@@ -123,7 +123,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "gwanak-high-budget-8w-verified",
+      "scenarioRef": "scenario-1b960a4023e50e4e",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "proceed_to_human_contract_review",
       "requiredActions": [
@@ -229,7 +229,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "gwanak-low-budget-1w-missing-terms",
+      "scenarioRef": "scenario-ee5fd35036d8c029",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "use_bounded_temporary_housing_and_verify",
       "requiredActions": [
@@ -339,7 +339,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "gwanak-low-budget-8w-verified",
+      "scenarioRef": "scenario-5a5b12e37468d5d3",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "adjust_budget_or_market_constraints",
       "requiredActions": [
@@ -445,7 +445,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "mapo-high-budget-1w-missing-terms",
+      "scenarioRef": "scenario-036ffc9b13f7f44e",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "use_bounded_temporary_housing_and_verify",
       "requiredActions": [
@@ -554,7 +554,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "mapo-high-budget-8w-conflicting-rights",
+      "scenarioRef": "scenario-f65a03c3c3af3b6f",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "escalate_to_licensed_professional",
       "requiredActions": [
@@ -664,7 +664,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "mapo-high-budget-8w-verified",
+      "scenarioRef": "scenario-44e1f237f3a77677",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "proceed_to_human_contract_review",
       "requiredActions": [
@@ -770,7 +770,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "mapo-low-budget-1w-missing-terms",
+      "scenarioRef": "scenario-3a577f75111b0756",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "use_bounded_temporary_housing_and_verify",
       "requiredActions": [
@@ -880,7 +880,7 @@
     },
     {
       "schemaVersion": 1,
-      "scenarioId": "mapo-low-budget-8w-verified",
+      "scenarioRef": "scenario-ce2139f8e5026977",
       "claimStatus": "mechanism_test_only_not_calibrated",
       "recommendedAction": "adjust_budget_or_market_constraints",
       "requiredActions": [
@@ -995,5 +995,5 @@
   "inputManifestSha256": "b18ab4b496947589f2916645535d3b76426d6ea760aba44bb8715015fe19f8a4",
   "inputCommit": "2dda55094d85b19deed943f30b407d87fcf99708",
   "scenarioFileSha256": "146d877b77b50d59d27a13853cd53301a8996ee869289e6a435fb493345c9ff5",
-  "modelCodeSha256": "fdcfd8a0bff12988b6700c25e7ad634a08cc669db6dd29d6dabd8ed16da621f3"
+  "modelCodeSha256": "036761b7945afed6d999bde3508e81382f05ea988b1dbaa8977fd1f88a580f2b"
 }

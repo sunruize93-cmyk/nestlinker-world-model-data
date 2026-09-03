@@ -121,6 +121,7 @@ class MinimumWorldModelTests(unittest.TestCase):
     def test_scenario_matrix_is_order_independent_and_never_recommends_signing(self):
         first = deepcopy(safe_scenario())
         first.pop("simulation")
+        first.pop("scenarioEvidence")
         second = deepcopy(first)
         second["scenarioId"] = "student-gwanak-2w-missing-check"
         second["profile"]["moveInWeeks"] = 2
@@ -153,6 +154,16 @@ class MinimumWorldModelTests(unittest.TestCase):
         duplicate = {**spec, "scenarios": [first, first]}
         with self.assertRaisesRegex(ValueError, "unique"):
             run_scenario_matrix(market_payload(), duplicate)
+
+        injected = deepcopy(first)
+        injected["simulation"] = {"seed": 1, "draws": 100, "email": "student@example.com"}
+        with self.assertRaisesRegex(ValueError, "unexpected matrix scenario fields"):
+            run_scenario_matrix(market_payload(), {**spec, "scenarios": [injected]})
+
+        mislabeled = deepcopy(first)
+        mislabeled["scenarioEvidence"] = "observed"
+        with self.assertRaisesRegex(ValueError, "unexpected matrix scenario fields"):
+            run_scenario_matrix(market_payload(), {**spec, "scenarios": [mislabeled]})
 
     def test_completed_checkpoints_do_not_consume_future_verification_time(self):
         scenario = deepcopy(safe_scenario())
@@ -192,9 +203,10 @@ class MinimumWorldModelTests(unittest.TestCase):
             run_minimum_world_model(market_payload(), personal_data)
 
         personal_identifier = deepcopy(safe_scenario())
-        personal_identifier["scenarioId"] = "student@example.com"
-        with self.assertRaisesRegex(ValueError, "safe slug"):
-            run_minimum_world_model(market_payload(), personal_identifier)
+        personal_identifier["scenarioId"] = "01012345678"
+        redacted_result = run_minimum_world_model(market_payload(), personal_identifier)
+        self.assertNotIn("01012345678", json.dumps(redacted_result, ensure_ascii=False))
+        self.assertRegex(redacted_result["scenarioRef"], r"^scenario-[0-9a-f]{16}$")
 
         noisy_market = deepcopy(safe_scenario())
         noisy_market["market"]["note"] = "changes-no-behavior"
@@ -209,6 +221,7 @@ class MinimumWorldModelTests(unittest.TestCase):
     def test_cli_runs_a_provenance_bound_scenario_matrix(self):
         scenario = deepcopy(safe_scenario())
         scenario.pop("simulation")
+        scenario.pop("scenarioEvidence")
         spec = {
             "schemaVersion": 1,
             "claimStatus": "synthetic_profiles_for_mechanism_test_only",

@@ -33,6 +33,7 @@ SIMULATION_FIELDS = {"seed", "draws"}
 SCENARIO_FIELDS = {
     "scenarioId", "scenarioEvidence", "profile", "market", "checkpoints", "policy", "simulation",
 }
+MATRIX_SCENARIO_FIELDS = {"scenarioId", "profile", "market", "checkpoints", "policy"}
 CHECKPOINTS = (
     "ownershipAndAuthority",
     "rightsAndEncumbrances",
@@ -143,8 +144,8 @@ def run_minimum_world_model(
         raise ValueError("market payload generatedAt must include a timezone")
     market = _selected_market(market_payload, market_request)
     scenario_id = scenario.get("scenarioId")
-    if not isinstance(scenario_id, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", scenario_id):
-        raise ValueError("scenarioId must be a non-identifying lowercase safe slug")
+    if not isinstance(scenario_id, str) or not scenario_id or len(scenario_id) > 200:
+        raise ValueError("scenarioId must be a non-empty string of at most 200 characters")
     seed_value = simulation.get("seed")
     draws_value = simulation.get("draws")
     if isinstance(seed_value, bool) or not isinstance(seed_value, int):
@@ -288,7 +289,7 @@ def run_minimum_world_model(
     ).hexdigest()
     return {
         "schemaVersion": 1,
-        "scenarioId": scenario.get("scenarioId"),
+        "scenarioRef": f"scenario-{input_digest[:16]}",
         "claimStatus": "mechanism_test_only_not_calibrated",
         "recommendedAction": action,
         "requiredActions": required_actions,
@@ -364,7 +365,11 @@ def run_scenario_matrix(
         raise ValueError("matrix seed must be an integer")
     if isinstance(draws, bool) or not isinstance(draws, int) or not 100 <= draws <= 100_000:
         raise ValueError("matrix draws must be an integer between 100 and 100000")
-    identifiers = [row.get("scenarioId") for row in scenarios if isinstance(row, Mapping)]
+    for scenario in scenarios:
+        if not isinstance(scenario, Mapping):
+            raise ValueError("every matrix scenario must be an object")
+        _require_exact_fields(scenario, MATRIX_SCENARIO_FIELDS, "matrix scenario")
+    identifiers = [row.get("scenarioId") for row in scenarios]
     if len(identifiers) != len(scenarios) or any(not isinstance(value, str) or not value for value in identifiers):
         raise ValueError("every scenario requires a non-empty scenarioId")
     if len(set(identifiers)) != len(identifiers):
