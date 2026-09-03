@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-03T00:48:41.018044+00:00",
+  "inputCommit": "a1ed342020252b0e4c4ab16628021d58d77cc6c1",
+  "inputSources": [
+    {
+      "contractYear": 2022,
+      "sha256": "77483fe458b54523042aa6443c25034918dd4cea220bd6e871b5332ac4cc3dab",
+      "bytes": 14462130,
+      "retrievedAt": "2026-09-03T00:10:49Z"
+    },
+    {
+      "contractYear": 2023,
+      "sha256": "8edf19b8c94fd81ebad58438a521cf789e2eb37b413323159e4990484701664b",
+      "bytes": 14651366,
+      "retrievedAt": "2026-09-03T00:09:29Z"
+    },
+    {
+      "contractYear": 2024,
+      "sha256": "1a72d2dc71a8cca3b1f87747427e5e181f7ae954d9c1fed6cf2f4670e674f125",
+      "bytes": 13844344,
+      "retrievedAt": "2026-09-03T00:09:32Z"
+    }
+  ],
+  "minimumGroupCount": 30,
+  "purpose": "receipt-year mismatch filter sensitivity only; not a safety outcome evaluation",
+  "excludedReceiptYearMismatchCount": 6424,
+  "excludedReceiptYearMismatchByContractMonth": {
+    "2022-01": 12,
+    "2022-02": 2,
+    "2022-03": 1,
+    "2022-04": 1,
+    "2022-05": 2,
+    "2022-06": 1,
+    "2022-07": 9,
+    "2022-08": 3,
+    "2022-09": 4,
+    "2022-10": 6,
+    "2022-11": 998,
+    "2022-12": 5385
+  },
+  "filtered": {
+    "schemaVersion": 1,
+    "claimStatus": "retrospective_structural_market_replay_only",
+    "years": [
+      2022,
+      2023,
+      2024
+    ],
+    "minimumGroupCount": 30,
+    "folds": [
+      {
+        "trainYear": 2022,
+        "testYear": 2023,
+        "baseline": "prior_year_same_month_group_median",
+        "deposit": {
+          "eligibleGroupCount": 2240,
+          "targetRecordCount": 526269,
+          "weightedAbsoluteErrorManwon": 2477.2,
+          "weightedAbsolutePercentageError": 0.1256,
+          "medianAbsolutePercentageError": 0.0773,
+          "medianBandCoverage": 0.9817
+        },
+        "monthlyLeaseDeposit": {
+          "eligibleGroupCount": 1133,
+          "targetRecordCount": 270718,
+          "weightedAbsoluteErrorManwon": 1873.81,
+          "weightedAbsolutePercentageError": 0.3283,
+          "medianAbsolutePercentageError": 0.0909,
+          "medianBandCoverage": 0.9846
+        },
+        "jeonseDeposit": {
+          "eligibleGroupCount": 1107,
+          "targetRecordCount": 255551,
+          "weightedAbsoluteErrorManwon": 3116.4,
+          "weightedAbsolutePercentageError": 0.0902,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9786
+        },
+        "monthlyRent": {
+          "eligibleGroupCount": 1133,
+          "targetRecordCount": 270718,
+          "weightedAbsoluteErrorManwon": 7.64,
+          "weightedAbsolutePercentageError": 0.1259,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9731
+        }
+      },
+      {
+        "trainYear": 2023,
+        "testYear": 2024,
+        "baseline": "prior_year_same_month_group_median",
+        "deposit": {
+          "eligibleGroupCount": 2248,
+          "targetRecordCount": 499018,
+          "weightedAbsoluteErrorManwon": 2370.01,
+          "weightedAbsolutePercentageError": 0.122,
+          "medianAbsolutePercentageError": 0.0833,
+          "medianBandCoverage": 0.9795
+        },
+        "monthlyLeaseDeposit": {
+          "eligibleGroupCount": 1155,
+          "targetRecordCount": 280882,
+          "weightedAbsoluteErrorManwon": 1358.18,
+          "weightedAbsolutePercentageError": 0.2357,
+          "medianAbsolutePercentageError": 0.137,
+          "medianBandCoverage": 0.9922
+        },
+        "jeonseDeposit": {
+          "eligibleGroupCount": 1093,
+          "targetRecordCount": 218136,
+          "weightedAbsoluteErrorManwon": 3672.91,
+          "weightedAbsolutePercentageError": 0.0992,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9631
+        },
+        "monthlyRent": {
+          "eligibleGroupCount": 1155,
+          "targetRecordCount": 280882,
+          "weightedAbsoluteErrorManwon": 6.96,
+          "weightedAbsolutePercentageError": 0.1174,
+          "medianAbsolutePercentageError": 0.0667,
+          "medianBandCoverage": 0.981
+        }
+      }
+    ],
+    "limitations": [
+      "The baseline evaluates aggregate historical price-band stability, not listing availability.",
+      "It has no contract-safety, deposit-loss, foreigner-friction, or user-outcome labels.",
+      "The annual source files are final retrospective releases; receipt-year filtering removes known cross-year leakage but cannot reconstruct the exact file visible at a historical cutoff.",
+      "Band coverage means a target group median fell within the prior-year interquartile band; it is not individual-contract interval coverage."
+    ]
+  },
+  "includedForSensitivityOnly": {
+    "schemaVersion": 1,
+    "claimStatus": "sensitivity_counterfactual_not_valid_replay",
+    "years": [
+      2022,
+      2023,
+      2024
+    ],
+    "minimumGroupCount": 30,
+    "folds": [
+      {
+        "trainYear": 2022,
+        "testYear": 2023,
+        "baseline": "prior_year_same_month_group_median",
+        "deposit": {
+          "eligibleGroupCount": 2244,
+          "targetRecordCount": 526430,
+          "weightedAbsoluteErrorManwon": 2474.37,
+          "weightedAbsolutePercentageError": 0.1255,
+          "medianAbsolutePercentageError": 0.0782,
+          "medianBandCoverage": 0.9824
+        },
+        "monthlyLeaseDeposit": {
+          "eligibleGroupCount": 1136,
+          "targetRecordCount": 270849,
+          "weightedAbsoluteErrorManwon": 1878.7,
+          "weightedAbsolutePercentageError": 0.3292,
+          "medianAbsolutePercentageError": 0.0909,
+          "medianBandCoverage": 0.985
+        },
+        "jeonseDeposit": {
+          "eligibleGroupCount": 1108,
+          "targetRecordCount": 255581,
+          "weightedAbsoluteErrorManwon": 3105.62,
+          "weightedAbsolutePercentageError": 0.0898,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9796
+        },
+        "monthlyRent": {
+          "eligibleGroupCount": 1136,
+          "targetRecordCount": 270849,
+          "weightedAbsoluteErrorManwon": 7.6,
+          "weightedAbsolutePercentageError": 0.1251,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9731
+        }
+      },
+      {
+        "trainYear": 2023,
+        "testYear": 2024,
+        "baseline": "prior_year_same_month_group_median",
+        "deposit": {
+          "eligibleGroupCount": 2248,
+          "targetRecordCount": 499018,
+          "weightedAbsoluteErrorManwon": 2370.01,
+          "weightedAbsolutePercentageError": 0.122,
+          "medianAbsolutePercentageError": 0.0833,
+          "medianBandCoverage": 0.9795
+        },
+        "monthlyLeaseDeposit": {
+          "eligibleGroupCount": 1155,
+          "targetRecordCount": 280882,
+          "weightedAbsoluteErrorManwon": 1358.18,
+          "weightedAbsolutePercentageError": 0.2357,
+          "medianAbsolutePercentageError": 0.137,
+          "medianBandCoverage": 0.9922
+        },
+        "jeonseDeposit": {
+          "eligibleGroupCount": 1093,
+          "targetRecordCount": 218136,
+          "weightedAbsoluteErrorManwon": 3672.91,
+          "weightedAbsolutePercentageError": 0.0992,
+          "medianAbsolutePercentageError": 0.0769,
+          "medianBandCoverage": 0.9631
+        },
+        "monthlyRent": {
+          "eligibleGroupCount": 1155,
+          "targetRecordCount": 280882,
+          "weightedAbsoluteErrorManwon": 6.96,
+          "weightedAbsolutePercentageError": 0.1174,
+          "medianAbsolutePercentageError": 0.0667,
+          "medianBandCoverage": 0.981
+        }
+      }
+    ],
+    "limitations": [
+      "This counterfactual deliberately includes cross-year receipt records and is not a valid historical replay.",
+      "It exists only to measure sensitivity to the receipt-year exclusion rule.",
+      "It has no contract-safety, deposit-loss, foreigner-friction, or user-outcome labels.",
+      "Band coverage concerns aggregate group medians, not individual contracts."
+    ]
+  },
+  "comparisons": [
+    {
+      "trainYear": 2022,
+      "testYear": 2023,
+      "metric": "monthlyLeaseDeposit",
+      "wapeAbsoluteDifference": 0.0009,
+      "bandCoverageAbsoluteDifference": 0.0004
+    },
+    {
+      "trainYear": 2022,
+      "testYear": 2023,
+      "metric": "jeonseDeposit",
+      "wapeAbsoluteDifference": 0.0004,
+      "bandCoverageAbsoluteDifference": 0.001
+    },
+    {
+      "trainYear": 2022,
+      "testYear": 2023,
+      "metric": "monthlyRent",
+      "wapeAbsoluteDifference": 0.0008,
+      "bandCoverageAbsoluteDifference": 0.0
+    },
+    {
+      "trainYear": 2023,
+      "testYear": 2024,
+      "metric": "monthlyLeaseDeposit",
+      "wapeAbsoluteDifference": 0.0,
+      "bandCoverageAbsoluteDifference": 0.0
+    },
+    {
+      "trainYear": 2023,
+      "testYear": 2024,
+      "metric": "jeonseDeposit",
+      "wapeAbsoluteDifference": 0.0,
+      "bandCoverageAbsoluteDifference": 0.0
+    },
+    {
+      "trainYear": 2023,
+      "testYear": 2024,
+      "metric": "monthlyRent",
+      "wapeAbsoluteDifference": 0.0,
+      "bandCoverageAbsoluteDifference": 0.0
+    }
+  ],
+  "maximumWapeAbsoluteDifference": 0.0009,
+  "maximumBandCoverageAbsoluteDifference": 0.001
+}
