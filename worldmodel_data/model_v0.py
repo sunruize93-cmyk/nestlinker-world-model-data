@@ -14,16 +14,40 @@ import random
 import re
 from collections import Counter
 from copy import deepcopy
+from datetime import datetime
 from typing import Mapping
 
 
 MODEL_VERSION = "minimum-world-model-v0"
+APPROVED_MARKET_SOURCE = "seoul-rental-price-files"
+APPROVED_DATA_LABEL = "derived_observed"
+APPROVED_USAGE = "historical_time_sliced_distribution"
+PROFILE_FIELDS = {
+    "cashBudgetManwon", "maximumDepositExposureManwon", "monthlyHousingBudgetManwon",
+    "moveInWeeks", "temporaryHousingMaxWeeks", "temporaryHousingBudgetManwon",
+    "temporaryHousingWeeklyCostManwon",
+}
+MARKET_FIELDS = {"contractMonth", "guCode", "buildingUse", "leaseType"}
+POLICY_FIELDS = {"minimumAffordabilityRate", "verificationLeadWeeks"}
+SIMULATION_FIELDS = {"seed", "draws"}
+SCENARIO_FIELDS = {
+    "scenarioId", "scenarioEvidence", "profile", "market", "checkpoints", "policy", "simulation",
+}
 CHECKPOINTS = (
     "ownershipAndAuthority",
     "rightsAndEncumbrances",
     "depositProtectionEligibility",
     "contractTerms",
 )
+
+
+def _require_exact_fields(values: Mapping[str, object], allowed: set[str], label: str) -> None:
+    unexpected = set(values) - allowed
+    missing = allowed - set(values)
+    if unexpected:
+        raise ValueError(f"unexpected {label} fields: {sorted(map(str, unexpected))}")
+    if missing:
+        raise ValueError(f"missing {label} fields: {sorted(missing)}")
 
 
 def _finite_number(values: Mapping[str, object], key: str, *, positive: bool = False) -> float:
@@ -91,6 +115,32 @@ def run_minimum_world_model(
         profile, market_request, checkpoints, policy, simulation
     )):
         raise ValueError("scenario requires profile, market, checkpoints, policy and simulation")
+    _require_exact_fields(scenario, SCENARIO_FIELDS, "scenario")
+    _require_exact_fields(profile, PROFILE_FIELDS, "profile")
+    _require_exact_fields(market_request, MARKET_FIELDS, "market")
+    _require_exact_fields(checkpoints, set(CHECKPOINTS), "checkpoint")
+    _require_exact_fields(policy, POLICY_FIELDS, "policy")
+    _require_exact_fields(simulation, SIMULATION_FIELDS, "simulation")
+    if scenario.get("scenarioEvidence") != "synthetic":
+        raise ValueError("scenarioEvidence must be synthetic for the v0 mechanism test")
+    provenance = market_payload.get("provenance")
+    if (
+        not isinstance(provenance, Mapping)
+        or market_payload.get("source") != APPROVED_MARKET_SOURCE
+        or provenance.get("sourceId") != APPROVED_MARKET_SOURCE
+        or provenance.get("dataLabel") != APPROVED_DATA_LABEL
+        or provenance.get("usage") != APPROVED_USAGE
+    ):
+        raise ValueError("market payload must carry the approved derived-observed source provenance")
+    source_generated_at = market_payload.get("generatedAt")
+    if not isinstance(source_generated_at, str):
+        raise ValueError("market payload requires a timestamped generatedAt")
+    try:
+        parsed_source_time = datetime.fromisoformat(source_generated_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("market payload generatedAt must be an ISO timestamp") from exc
+    if parsed_source_time.tzinfo is None:
+        raise ValueError("market payload generatedAt must include a timezone")
     market = _selected_market(market_payload, market_request)
     scenario_id = scenario.get("scenarioId")
     if not isinstance(scenario_id, str) or not scenario_id:
@@ -158,9 +208,10 @@ def run_minimum_world_model(
     exceedance_rate = round(sum(value > deposit_limit for value in deposits) / draws, 4)
     observed = {
         "evidenceGrade": "observed",
-        "sourceDataLabel": "derived_observed",
-        "source": market_payload.get("source"),
-        "sourceGeneratedAt": market_payload.get("generatedAt"),
+        "sourceDataLabel": provenance["dataLabel"],
+        "source": provenance["sourceId"],
+        "sourceUsage": provenance["usage"],
+        "sourceGeneratedAt": source_generated_at,
         "sourceRecordCount": market["count"],
         "marketCell": {key: market[key] for key in (
             "contractMonth", "guCode", "guName", "buildingUse", "leaseType"
@@ -189,20 +240,20 @@ def run_minimum_world_model(
         and fallback_weeks_needed * temporary_weekly_cost <= temporary_budget
     )
     continuity_satisfied = move_in_weeks >= remaining_verification_weeks or fallback_feasible
-    safety_gate = {
+    mechanism_gate = {
         "passes": False,
-        "cashConstraintSatisfied": affordability_rate >= minimum_affordability,
-        "depositExposureConstraintSatisfied": synthetic["depositP95Manwon"] <= deposit_limit,
+        "marketAffordabilityStressSatisfied": affordability_rate >= minimum_affordability,
+        "depositP95StressSatisfied": synthetic["depositP95Manwon"] <= deposit_limit,
         "mandatoryCheckpointsSatisfied": not unresolved,
         "housingContinuityFallbackSatisfied": continuity_satisfied,
         "unresolvedCheckpoints": unresolved,
         "conflictingCheckpoints": conflicts,
     }
-    safety_gate["passes"] = all((
-        safety_gate["cashConstraintSatisfied"],
-        safety_gate["depositExposureConstraintSatisfied"],
-        safety_gate["mandatoryCheckpointsSatisfied"],
-        safety_gate["housingContinuityFallbackSatisfied"],
+    mechanism_gate["passes"] = all((
+        mechanism_gate["marketAffordabilityStressSatisfied"],
+        mechanism_gate["depositP95StressSatisfied"],
+        mechanism_gate["mandatoryCheckpointsSatisfied"],
+        mechanism_gate["housingContinuityFallbackSatisfied"],
     ))
     next_checkpoint = conflicts[0] if conflicts else (unresolved[0] if unresolved else None)
     if conflicts:
@@ -213,7 +264,7 @@ def run_minimum_world_model(
         action = "no_safe_path_adjust_deadline_or_fallback"
     elif unresolved:
         action = "complete_real_world_checkpoints"
-    elif not safety_gate["cashConstraintSatisfied"] or not safety_gate["depositExposureConstraintSatisfied"]:
+    elif not mechanism_gate["marketAffordabilityStressSatisfied"] or not mechanism_gate["depositP95StressSatisfied"]:
         action = "adjust_budget_or_market_constraints"
     elif not continuity_satisfied:
         action = "use_bounded_temporary_housing"
@@ -226,7 +277,7 @@ def run_minimum_world_model(
         required_actions.append("adjust_deadline_or_fallback")
     if conflicts:
         required_actions.append("escalate_to_licensed_professional")
-    if not safety_gate["cashConstraintSatisfied"] or not safety_gate["depositExposureConstraintSatisfied"]:
+    if not mechanism_gate["marketAffordabilityStressSatisfied"] or not mechanism_gate["depositP95StressSatisfied"]:
         required_actions.append("adjust_budget_or_market_constraints")
     if unresolved and not conflicts:
         required_actions.append("complete_real_world_checkpoints")
@@ -242,7 +293,17 @@ def run_minimum_world_model(
         "recommendedAction": action,
         "requiredActions": required_actions,
         "nextCheckpoint": next_checkpoint,
-        "safetyGate": safety_gate,
+        "mechanismGate": mechanism_gate,
+        "safetyGate": {
+            "status": "unknown_missing_outcome_calibration",
+            "passes": None,
+            "missingTerms": [
+                "depositLossTailRisk_R_D",
+                "contractHarmTailRisk_R_C",
+                "housingContinuityProbability_P_H",
+            ],
+            "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels.",
+        },
         "scenarioInputs": {
             "profile": {
                 "evidenceGrade": "synthetic",
@@ -285,6 +346,13 @@ def run_scenario_matrix(
     """Run an order-independent matrix with common random streams per market cell."""
     if specification.get("schemaVersion") != 1:
         raise ValueError("scenario matrix schemaVersion must be 1")
+    _require_exact_fields(
+        specification,
+        {"schemaVersion", "claimStatus", "seed", "draws", "scenarios"},
+        "scenario matrix",
+    )
+    if specification.get("claimStatus") != "synthetic_profiles_for_mechanism_test_only":
+        raise ValueError("scenario matrix must declare synthetic_profiles_for_mechanism_test_only")
     scenarios = specification.get("scenarios")
     if not isinstance(scenarios, list) or not scenarios:
         raise ValueError("scenario matrix requires a non-empty scenarios list")
@@ -304,9 +372,12 @@ def run_scenario_matrix(
     results = []
     for scenario in sorted(scenarios, key=lambda row: row["scenarioId"]):
         prepared = deepcopy(scenario)
-        market_stream = json.dumps(
-            prepared.get("market"), ensure_ascii=False, sort_keys=True, separators=(",", ":")
-        )
+        prepared["scenarioEvidence"] = "synthetic"
+        market = prepared.get("market")
+        if not isinstance(market, Mapping):
+            raise ValueError("every scenario requires a market object")
+        canonical_market = {key: market.get(key) for key in sorted(MARKET_FIELDS)}
+        market_stream = json.dumps(canonical_market, ensure_ascii=False, separators=(",", ":"))
         digest = hashlib.sha256(f"{master_seed}:{market_stream}".encode("utf-8")).digest()
         prepared["simulation"] = {
             "seed": int.from_bytes(digest[:8], "big"),

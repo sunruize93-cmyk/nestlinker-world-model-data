@@ -22,16 +22,26 @@
         "complete_real_world_checkpoints"
       ],
       "nextCheckpoint": "contractTerms",
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": true,
-        "depositExposureConstraintSatisfied": true,
+        "marketAffordabilityStressSatisfied": true,
+        "depositP95StressSatisfied": true,
         "mandatoryCheckpointsSatisfied": false,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [
           "contractTerms"
         ],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -71,6 +81,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 239,
           "marketCell": {
@@ -108,7 +119,7 @@
         "seed": 16097536449005414942,
         "draws": 5000
       },
-      "inputSha256": "39ea1d2e8aef103643b8ca89171af346e1826d7f8154e76ec466963d964ab19b"
+      "inputSha256": "f481c4617c53fc2fcdeedb010d3ead5ec39df8f428898ffa4dfe410908894c44"
     },
     {
       "schemaVersion": 1,
@@ -119,14 +130,24 @@
         "proceed_to_human_contract_review"
       ],
       "nextCheckpoint": null,
-      "safetyGate": {
+      "mechanismGate": {
         "passes": true,
-        "cashConstraintSatisfied": true,
-        "depositExposureConstraintSatisfied": true,
+        "marketAffordabilityStressSatisfied": true,
+        "depositP95StressSatisfied": true,
         "mandatoryCheckpointsSatisfied": true,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -166,6 +187,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 239,
           "marketCell": {
@@ -203,7 +225,7 @@
         "seed": 16097536449005414942,
         "draws": 5000
       },
-      "inputSha256": "8201304be470e9ab6ba3061b58f9b179170ee8c6d2840d4b6fa2c6e77d070660"
+      "inputSha256": "1b960a4023e50e4ea2a93dc0187ab35a42b0f0793733f617456aec74298b82b6"
     },
     {
       "schemaVersion": 1,
@@ -216,16 +238,26 @@
         "complete_real_world_checkpoints"
       ],
       "nextCheckpoint": "contractTerms",
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": false,
-        "depositExposureConstraintSatisfied": false,
+        "marketAffordabilityStressSatisfied": false,
+        "depositP95StressSatisfied": false,
         "mandatoryCheckpointsSatisfied": false,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [
           "contractTerms"
         ],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -265,6 +297,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 239,
           "marketCell": {
@@ -302,7 +335,7 @@
         "seed": 16097536449005414942,
         "draws": 5000
       },
-      "inputSha256": "663dcec5f2dfaf0d0347842d8c7dae367713c173b02883ea620c3cdb1668d840"
+      "inputSha256": "ee5fd35036d8c0298c801e8a769b149e56d1a7818c1edb898121c16e5b2259a1"
     },
     {
       "schemaVersion": 1,
@@ -313,14 +346,24 @@
         "adjust_budget_or_market_constraints"
       ],
       "nextCheckpoint": null,
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": false,
-        "depositExposureConstraintSatisfied": false,
+        "marketAffordabilityStressSatisfied": false,
+        "depositP95StressSatisfied": false,
         "mandatoryCheckpointsSatisfied": true,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -360,6 +403,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 239,
           "marketCell": {
@@ -397,7 +441,7 @@
         "seed": 16097536449005414942,
         "draws": 5000
       },
-      "inputSha256": "513e347ae15a336fde5627c502393a87798f948c41056e1082e716adc4939b45"
+      "inputSha256": "5a5b12e37468d5d3903a894310a9b76092ed8ed7aa5c864a084d6837822f8bf9"
     },
     {
       "schemaVersion": 1,
@@ -409,16 +453,26 @@
         "complete_real_world_checkpoints"
       ],
       "nextCheckpoint": "contractTerms",
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": true,
-        "depositExposureConstraintSatisfied": true,
+        "marketAffordabilityStressSatisfied": true,
+        "depositP95StressSatisfied": true,
         "mandatoryCheckpointsSatisfied": false,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [
           "contractTerms"
         ],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -458,6 +512,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 301,
           "marketCell": {
@@ -495,7 +550,7 @@
         "seed": 3508112594383989822,
         "draws": 5000
       },
-      "inputSha256": "c2846624e7c8f7e8aa5c604eef63f799af95a3069c982228c056bddabbe455bc"
+      "inputSha256": "036ffc9b13f7f44e2eb44765b6c821a6a3bcfd64200db1b6dd983b839a939237"
     },
     {
       "schemaVersion": 1,
@@ -506,10 +561,10 @@
         "escalate_to_licensed_professional"
       ],
       "nextCheckpoint": "rightsAndEncumbrances",
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": true,
-        "depositExposureConstraintSatisfied": true,
+        "marketAffordabilityStressSatisfied": true,
+        "depositP95StressSatisfied": true,
         "mandatoryCheckpointsSatisfied": false,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [
@@ -518,6 +573,16 @@
         "conflictingCheckpoints": [
           "rightsAndEncumbrances"
         ]
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -557,6 +622,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 301,
           "marketCell": {
@@ -594,7 +660,7 @@
         "seed": 3508112594383989822,
         "draws": 5000
       },
-      "inputSha256": "cae3886d42f7314e1d98586e2068bf225e67764a9751b9eb385c088b25cfd36e"
+      "inputSha256": "f65a03c3c3af3b6f30aba501936938a4bd593a25444ba6369a6c9ecaeaff2882"
     },
     {
       "schemaVersion": 1,
@@ -605,14 +671,24 @@
         "proceed_to_human_contract_review"
       ],
       "nextCheckpoint": null,
-      "safetyGate": {
+      "mechanismGate": {
         "passes": true,
-        "cashConstraintSatisfied": true,
-        "depositExposureConstraintSatisfied": true,
+        "marketAffordabilityStressSatisfied": true,
+        "depositP95StressSatisfied": true,
         "mandatoryCheckpointsSatisfied": true,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -652,6 +728,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 301,
           "marketCell": {
@@ -689,7 +766,7 @@
         "seed": 3508112594383989822,
         "draws": 5000
       },
-      "inputSha256": "62a920f4e08fe84fab6ff14f11df09a6c36947d0d829333e00c84fd9fbf92b65"
+      "inputSha256": "44e1f237f3a7767762077725ff0d3d5eb01f6fba062b2f76e3bd35df09c03ae1"
     },
     {
       "schemaVersion": 1,
@@ -702,16 +779,26 @@
         "complete_real_world_checkpoints"
       ],
       "nextCheckpoint": "contractTerms",
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": false,
-        "depositExposureConstraintSatisfied": false,
+        "marketAffordabilityStressSatisfied": false,
+        "depositP95StressSatisfied": false,
         "mandatoryCheckpointsSatisfied": false,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [
           "contractTerms"
         ],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -751,6 +838,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 301,
           "marketCell": {
@@ -788,7 +876,7 @@
         "seed": 3508112594383989822,
         "draws": 5000
       },
-      "inputSha256": "b2d7eaf2868f6836667a133a3482ca4ca1af93fc23f9851e3e27bd11bf69943f"
+      "inputSha256": "3a577f75111b0756fbf2c1fb935e99249ce2710569d765758b69366bd7beca99"
     },
     {
       "schemaVersion": 1,
@@ -799,14 +887,24 @@
         "adjust_budget_or_market_constraints"
       ],
       "nextCheckpoint": null,
-      "safetyGate": {
+      "mechanismGate": {
         "passes": false,
-        "cashConstraintSatisfied": false,
-        "depositExposureConstraintSatisfied": false,
+        "marketAffordabilityStressSatisfied": false,
+        "depositP95StressSatisfied": false,
         "mandatoryCheckpointsSatisfied": true,
         "housingContinuityFallbackSatisfied": true,
         "unresolvedCheckpoints": [],
         "conflictingCheckpoints": []
+      },
+      "safetyGate": {
+        "status": "unknown_missing_outcome_calibration",
+        "passes": null,
+        "missingTerms": [
+          "depositLossTailRisk_R_D",
+          "contractHarmTailRisk_R_C",
+          "housingContinuityProbability_P_H"
+        ],
+        "limitation": "Mechanism checks cannot establish the complete safety-first objective without real outcome labels."
       },
       "scenarioInputs": {
         "profile": {
@@ -846,6 +944,7 @@
           "evidenceGrade": "observed",
           "sourceDataLabel": "derived_observed",
           "source": "seoul-rental-price-files",
+          "sourceUsage": "historical_time_sliced_distribution",
           "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
           "sourceRecordCount": 301,
           "marketCell": {
@@ -883,7 +982,7 @@
         "seed": 3508112594383989822,
         "draws": 5000
       },
-      "inputSha256": "e957d00687a12d22efb0eb45ffc22e47c894b7c2ac7f518809ab0569b2f207d7"
+      "inputSha256": "ce2139f8e5026977167664b8cb235628cde09aa63e576ae185076c5b3c2ffe52"
     }
   ],
   "nonClaims": [
@@ -892,7 +991,9 @@
     "Historical aggregate price bands do not represent current inventory."
   ],
   "inputSnapshot": "seoul-rental-history-2026-09-03",
-  "inputSnapshotSha256": "ef64ac1297ede15c411c3712e61f4495909856ec0cbaee71a8c1c1261602aadc",
+  "inputDataSha256": "ef64ac1297ede15c411c3712e61f4495909856ec0cbaee71a8c1c1261602aadc",
+  "inputManifestSha256": "b18ab4b496947589f2916645535d3b76426d6ea760aba44bb8715015fe19f8a4",
+  "inputCommit": "2dda55094d85b19deed943f30b407d87fcf99708",
   "scenarioFileSha256": "146d877b77b50d59d27a13853cd53301a8996ee869289e6a435fb493345c9ff5",
-  "modelCodeSha256": "ff39e624084ee254b8da8d26e2ce8380757107c5434f601246df74436f836efa"
+  "modelCodeSha256": "5e17e1ddae24426ccae48a9a1c71ac88600b0bc87ec3efa11296ea23fab235f0"
 }

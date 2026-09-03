@@ -11,7 +11,7 @@ v0 已跑通，但结论仅为 **机制可运行、尚未校准**。它能把真
 - `run_minimum_world_model(market_payload, scenario)`：运行单一情景。
 - `run_scenario_matrix(market_payload, specification)`：排序情景、为相同市场分配共同随机流并生成确定性报告。
 
-CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 manifest、schema 与哈希，再读取情景文件，输出绑定市场快照、情景文件和模型代码 SHA-256 的不可覆盖结果。
+CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 manifest、schema 与哈希，并只接受 `seoul-rental-price-files / derived_observed / historical_time_sliced_distribution`，再读取情景文件。输出同时绑定数据文件 SHA-256、manifest SHA-256、manifest 输入 commit、情景文件 SHA-256 和模型代码 SHA-256。
 
 ## 状态与标签
 
@@ -24,7 +24,13 @@ CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 m
 | 可负担比例、押金暴露超限比例 | `modeled` | 历史聚合分位带上的压力测试代理，不是现实结果概率 |
 | 分位带插值产生的价格 | `synthetic` | 押金和月租边际分布独立抽样，不保留二者联合分布，也不对应真实挂牌或合同 |
 
-## 安全优先决策顺序
+## 机制门槛与安全状态
+
+`mechanismGate` 只检查市场可负担性压力代理、合成押金 P95 压力代理、演练中的核验状态和临时住房退路。它不能验证具体候选房的现金硬上限，也不能代替完整安全目标。
+
+完整 `safetyGate.passes` 固定为 `null`，状态为 `unknown_missing_outcome_calibration`，并列出缺失的 `R_D`、`R_C` 和 `P(H)`。只有获得 #15 的真人结果标签并完成校准后，才允许讨论完整安全门槛是否通过。
+
+## 安全优先行动顺序
 
 1. 核验冲突时，升级给持牌专业人员。
 2. 核验未完成且入住迫近时，只允许使用时间和成本均在用户上限内的临时住房，同时继续核验。
@@ -54,6 +60,7 @@ CLI `minimum-world-model` 是文件适配器：先校验已发布 snapshot 的 m
 - 缺失或冲突的强制核验不能被速度、便利或预算优势抵消。
 - 已完成的核验不会继续占用未来核验时间。
 - 非法预算、无序分位数、小样本市场单元格和非法核验状态会被拒绝。
+- profile、市场选择、核验状态、政策和随机参数使用严格白名单；未知字段会被拒绝，避免把个人信息写进结果。
 
 ## 当前缺口
 

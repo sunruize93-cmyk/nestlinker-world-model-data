@@ -498,18 +498,30 @@ def command_minimum_world_model(args: argparse.Namespace) -> int:
         raise SystemExit("snapshot validation failed: " + "; ".join(errors))
     manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
     entry = next(
-        (item for item in manifest["files"] if item.get("usage") == "historical_time_sliced_distribution"),
+        (
+            item for item in manifest["files"]
+            if item.get("usage") == "historical_time_sliced_distribution"
+            and item.get("source_id") == "seoul-rental-price-files"
+            and item.get("data_label") == "derived_observed"
+        ),
         None,
     )
     if entry is None:
         raise SystemExit("snapshot has no historical time-sliced distribution")
     market_path = snapshot_dir / entry["path"]
     market_payload = json.loads(market_path.read_text(encoding="utf-8"))
+    market_payload["provenance"] = {
+        "sourceId": entry["source_id"],
+        "dataLabel": entry["data_label"],
+        "usage": entry["usage"],
+    }
     specification = json.loads(scenario_file.read_text(encoding="utf-8"))
     result = run_scenario_matrix(market_payload, specification)
     result.update({
         "inputSnapshot": manifest["snapshot_id"],
-        "inputSnapshotSha256": sha256_file(market_path),
+        "inputDataSha256": sha256_file(market_path),
+        "inputManifestSha256": sha256_file(snapshot_dir / "manifest.json"),
+        "inputCommit": manifest["input_commit"],
         "scenarioFileSha256": sha256_file(scenario_file),
         "modelCodeSha256": sha256_file(ROOT / "worldmodel_data" / "model_v0.py"),
     })

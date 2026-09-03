@@ -16,6 +16,11 @@ def market_payload():
     return {
         "source": "seoul-rental-price-files",
         "generatedAt": "2026-09-03T00:00:00+00:00",
+        "provenance": {
+            "sourceId": "seoul-rental-price-files",
+            "dataLabel": "derived_observed",
+            "usage": "historical_time_sliced_distribution",
+        },
         "records": [{
             "contractYear": 2024,
             "contractMonth": "2024-08",
@@ -37,6 +42,7 @@ def market_payload():
 def safe_scenario(**overrides):
     scenario = {
         "scenarioId": "student-gwanak-8w",
+        "scenarioEvidence": "synthetic",
         "profile": {
             "cashBudgetManwon": 3000,
             "maximumDepositExposureManwon": 2500,
@@ -89,10 +95,12 @@ class MinimumWorldModelTests(unittest.TestCase):
 
         result = run_minimum_world_model(market_payload(), scenario)
 
-        self.assertFalse(result["safetyGate"]["passes"])
+        self.assertFalse(result["mechanismGate"]["passes"])
+        self.assertIsNone(result["safetyGate"]["passes"])
+        self.assertEqual(result["safetyGate"]["status"], "unknown_missing_outcome_calibration")
         self.assertEqual(result["recommendedAction"], "complete_real_world_checkpoints")
         self.assertEqual(result["nextCheckpoint"], "rightsAndEncumbrances")
-        self.assertEqual(result["safetyGate"]["unresolvedCheckpoints"], ["rightsAndEncumbrances"])
+        self.assertEqual(result["mechanismGate"]["unresolvedCheckpoints"], ["rightsAndEncumbrances"])
 
     def test_more_deposit_tolerance_never_increases_the_exposure_proxy(self):
         strict = deepcopy(safe_scenario())
@@ -117,7 +125,13 @@ class MinimumWorldModelTests(unittest.TestCase):
         second["scenarioId"] = "student-gwanak-2w-missing-check"
         second["profile"]["moveInWeeks"] = 2
         second["checkpoints"]["contractTerms"] = "missing"
-        spec = {"schemaVersion": 1, "seed": 20260903, "draws": 500, "scenarios": [first, second]}
+        spec = {
+            "schemaVersion": 1,
+            "claimStatus": "synthetic_profiles_for_mechanism_test_only",
+            "seed": 20260903,
+            "draws": 500,
+            "scenarios": [first, second],
+        }
         reversed_spec = {**spec, "scenarios": [second, first]}
 
         forward = run_scenario_matrix(market_payload(), spec)
@@ -148,7 +162,7 @@ class MinimumWorldModelTests(unittest.TestCase):
 
         result = run_minimum_world_model(market_payload(), scenario)
 
-        self.assertTrue(result["safetyGate"]["housingContinuityFallbackSatisfied"])
+        self.assertTrue(result["mechanismGate"]["housingContinuityFallbackSatisfied"])
         self.assertEqual(result["recommendedAction"], "proceed_to_human_contract_review")
 
     def test_invalid_budget_and_market_quantiles_are_rejected(self):
@@ -172,10 +186,31 @@ class MinimumWorldModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "verified, missing or conflict"):
             run_minimum_world_model(market_payload(), invalid_checkpoint)
 
+        personal_data = deepcopy(safe_scenario())
+        personal_data["profile"]["email"] = "student@example.com"
+        with self.assertRaisesRegex(ValueError, "unexpected profile fields"):
+            run_minimum_world_model(market_payload(), personal_data)
+
+        noisy_market = deepcopy(safe_scenario())
+        noisy_market["market"]["note"] = "changes-no-behavior"
+        with self.assertRaisesRegex(ValueError, "unexpected market fields"):
+            run_minimum_world_model(market_payload(), noisy_market)
+
+        fabricated = market_payload()
+        fabricated["source"] = "totally-fabricated"
+        with self.assertRaisesRegex(ValueError, "approved derived-observed source"):
+            run_minimum_world_model(fabricated, safe_scenario())
+
     def test_cli_runs_a_provenance_bound_scenario_matrix(self):
         scenario = deepcopy(safe_scenario())
         scenario.pop("simulation")
-        spec = {"schemaVersion": 1, "seed": 99, "draws": 200, "scenarios": [scenario]}
+        spec = {
+            "schemaVersion": 1,
+            "claimStatus": "synthetic_profiles_for_mechanism_test_only",
+            "seed": 99,
+            "draws": 200,
+            "scenarios": [scenario],
+        }
         snapshot = ROOT / "data/snapshots/2026-09-03/seoul-rental-history"
         with tempfile.TemporaryDirectory() as directory:
             specification = Path(directory) / "scenarios.json"
@@ -193,7 +228,9 @@ class MinimumWorldModelTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["inputSnapshot"], "seoul-rental-history-2026-09-03")
         self.assertEqual(result["scenarioCount"], 1)
-        self.assertEqual(len(result["inputSnapshotSha256"]), 64)
+        self.assertEqual(len(result["inputDataSha256"]), 64)
+        self.assertEqual(len(result["inputManifestSha256"]), 64)
+        self.assertEqual(len(result["inputCommit"]), 40)
         self.assertEqual(len(result["scenarioFileSha256"]), 64)
         self.assertEqual(len(result["modelCodeSha256"]), 64)
 
@@ -236,14 +273,14 @@ class MinimumWorldModelTests(unittest.TestCase):
         infeasible = run_minimum_world_model(market_payload(), scenario)
 
         self.assertEqual(feasible["recommendedAction"], "use_bounded_temporary_housing_and_verify")
-        self.assertTrue(feasible["safetyGate"]["housingContinuityFallbackSatisfied"])
+        self.assertTrue(feasible["mechanismGate"]["housingContinuityFallbackSatisfied"])
         self.assertEqual(feasible["requiredActions"], [
             "use_bounded_temporary_housing",
             "adjust_budget_or_market_constraints",
             "complete_real_world_checkpoints",
         ])
         self.assertEqual(infeasible["recommendedAction"], "no_safe_path_adjust_deadline_or_fallback")
-        self.assertFalse(infeasible["safetyGate"]["housingContinuityFallbackSatisfied"])
+        self.assertFalse(infeasible["mechanismGate"]["housingContinuityFallbackSatisfied"])
 
 
 if __name__ == "__main__":
