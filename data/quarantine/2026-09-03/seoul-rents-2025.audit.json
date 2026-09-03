@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "status": "quarantined",
+  "source_id": "seoul-rental-price-files",
+  "landing_url": "https://data.seoul.go.kr/dataList/OA-21276/A/1/datasetView.do",
+  "discovered_at": "2026-09-03",
+  "retrieved_at": "2026-09-03T00:09:36Z",
+  "official_file": "서울특별시_전월세가_2025.zip",
+  "sha256": "d7a887488fb89eb337e134d4ce724b0279b207ec4d4f54e6ee3fb95c6fa49d52",
+  "bytes": 26675279,
+  "archive_members": 1,
+  "uncompressed_bytes": 155574646,
+  "encoding": "cp949",
+  "source_rows": 1084942,
+  "exact_duplicate_rows": 446244,
+  "unique_exact_rows": 638698,
+  "exact_duplicate_ratio": 0.411307,
+  "decision": "Do not publish, aggregate, deduplicate, or use for replay until the provider explains the duplication or supplies a stable transaction identifier.",
+  "reason": "Exact-row duplication is systemic and source fields cannot distinguish export duplication from legitimate multiple contracts with identical public values."
+}
