@@ -144,8 +144,8 @@ def run_minimum_world_model(
         raise ValueError("market payload generatedAt must include a timezone")
     market = _selected_market(market_payload, market_request)
     scenario_id = scenario.get("scenarioId")
-    if not isinstance(scenario_id, str) or not scenario_id or len(scenario_id) > 200:
-        raise ValueError("scenarioId must be a non-empty string of at most 200 characters")
+    if not isinstance(scenario_id, str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,79}", scenario_id):
+        raise ValueError("scenarioId must be a lowercase safe slug beginning with a letter")
     seed_value = simulation.get("seed")
     draws_value = simulation.get("draws")
     if isinstance(seed_value, bool) or not isinstance(seed_value, int):
@@ -284,9 +284,10 @@ def run_minimum_world_model(
         required_actions.append("complete_real_world_checkpoints")
     if not required_actions:
         required_actions.append("proceed_to_human_contract_review")
-    input_digest = hashlib.sha256(
-        json.dumps(scenario, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()
+    digest_input = {key: value for key, value in scenario.items() if key != "scenarioId"}
+    input_digest = hashlib.sha256(json.dumps(
+        digest_input, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")).hexdigest()
     return {
         "schemaVersion": 1,
         "scenarioRef": f"scenario-{input_digest[:16]}",
@@ -389,6 +390,9 @@ def run_scenario_matrix(
             "draws": draws,
         }
         results.append(run_minimum_world_model(market_payload, prepared))
+    results.sort(key=lambda row: row["scenarioRef"])
+    if len({row["scenarioRef"] for row in results}) != len(results):
+        raise ValueError("matrix scenario definitions must be unique apart from scenarioId")
     actions = Counter(str(row["recommendedAction"]) for row in results)
     return {
         "schemaVersion": 1,

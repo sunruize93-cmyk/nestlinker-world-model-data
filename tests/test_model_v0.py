@@ -204,9 +204,14 @@ class MinimumWorldModelTests(unittest.TestCase):
 
         personal_identifier = deepcopy(safe_scenario())
         personal_identifier["scenarioId"] = "01012345678"
-        redacted_result = run_minimum_world_model(market_payload(), personal_identifier)
-        self.assertNotIn("01012345678", json.dumps(redacted_result, ensure_ascii=False))
-        self.assertRegex(redacted_result["scenarioRef"], r"^scenario-[0-9a-f]{16}$")
+        with self.assertRaisesRegex(ValueError, "safe slug"):
+            run_minimum_world_model(market_payload(), personal_identifier)
+
+        original = run_minimum_world_model(market_payload(), safe_scenario())
+        renamed = deepcopy(safe_scenario())
+        renamed["scenarioId"] = "renamed-synthetic-case"
+        self.assertEqual(original, run_minimum_world_model(market_payload(), renamed))
+        self.assertRegex(original["scenarioRef"], r"^scenario-[0-9a-f]{16}$")
 
         noisy_market = deepcopy(safe_scenario())
         noisy_market["market"]["note"] = "changes-no-behavior"
