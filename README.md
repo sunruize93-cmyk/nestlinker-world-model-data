@@ -53,6 +53,17 @@ python3 -m worldmodel_data receipt-filter-sensitivity \
 
 回放只检验区级历史价格带的稳定性，不检验实时房源、个体合同安全、押金能否返还或外国租客摩擦。
 
+运行最小世界模型的固定情景矩阵：
+
+```bash
+python3 -m worldmodel_data minimum-world-model \
+  --snapshot-dir data/snapshots/2026-09-03/seoul-rental-history \
+  --scenario-file docs/model/MINIMUM_WORLD_MODEL_SCENARIOS_V0.json \
+  --output /tmp/minimum-world-model-v0.json
+```
+
+已发布的参考输出见 `docs/model/MINIMUM_WORLD_MODEL_RUN_V0.json`。该模型只用于验证安全门槛、行动顺序和参数单调性；`affordabilityRate` 与 `depositExposureExceedanceRate` 是历史聚合价格带上的合成压力测试，不是当前找房成功率或押金损失概率。
+
 仓库保存可校验的聚合快照与机器结果；年度原始 ZIP 因包含不必要的物业明细而不提交 Git。manifest 固定其哈希，但官方文件可能更新，因此新的 checkout 可以复跑已发布聚合上的回放，未必能重新取得字节完全相同的原始 ZIP。异常文件证据保存在 `data/quarantine/`。
 
 从 NestLinker 主仓导入已有的公开数据派生快照：

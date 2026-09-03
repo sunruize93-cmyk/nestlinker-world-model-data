@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "claimStatus": "synthetic_profiles_for_mechanism_test_only",
+  "seed": 20260903,
+  "draws": 5000,
+  "scenarios": [
+    {
+      "scenarioId": "gwanak-low-budget-1w-missing-terms",
+      "profile": {
+        "cashBudgetManwon": 4000,
+        "maximumDepositExposureManwon": 3000,
+        "monthlyHousingBudgetManwon": 90,
+        "moveInWeeks": 1,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11620", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "missing"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "gwanak-low-budget-8w-verified",
+      "profile": {
+        "cashBudgetManwon": 4000,
+        "maximumDepositExposureManwon": 3000,
+        "monthlyHousingBudgetManwon": 90,
+        "moveInWeeks": 8,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11620", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "verified"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "gwanak-high-budget-1w-missing-terms",
+      "profile": {
+        "cashBudgetManwon": 12000,
+        "maximumDepositExposureManwon": 10000,
+        "monthlyHousingBudgetManwon": 120,
+        "moveInWeeks": 1,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11620", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "missing"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "gwanak-high-budget-8w-verified",
+      "profile": {
+        "cashBudgetManwon": 12000,
+        "maximumDepositExposureManwon": 10000,
+        "monthlyHousingBudgetManwon": 120,
+        "moveInWeeks": 8,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11620", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "verified"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "mapo-low-budget-1w-missing-terms",
+      "profile": {
+        "cashBudgetManwon": 4000,
+        "maximumDepositExposureManwon": 3000,
+        "monthlyHousingBudgetManwon": 90,
+        "moveInWeeks": 1,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11440", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "missing"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "mapo-low-budget-8w-verified",
+      "profile": {
+        "cashBudgetManwon": 4000,
+        "maximumDepositExposureManwon": 3000,
+        "monthlyHousingBudgetManwon": 90,
+        "moveInWeeks": 8,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11440", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "verified"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "mapo-high-budget-1w-missing-terms",
+      "profile": {
+        "cashBudgetManwon": 12000,
+        "maximumDepositExposureManwon": 10000,
+        "monthlyHousingBudgetManwon": 120,
+        "moveInWeeks": 1,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11440", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "missing"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "mapo-high-budget-8w-verified",
+      "profile": {
+        "cashBudgetManwon": 12000,
+        "maximumDepositExposureManwon": 10000,
+        "monthlyHousingBudgetManwon": 120,
+        "moveInWeeks": 8,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11440", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "verified", "depositProtectionEligibility": "verified", "contractTerms": "verified"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    },
+    {
+      "scenarioId": "mapo-high-budget-8w-conflicting-rights",
+      "profile": {
+        "cashBudgetManwon": 12000,
+        "maximumDepositExposureManwon": 10000,
+        "monthlyHousingBudgetManwon": 120,
+        "moveInWeeks": 8,
+        "temporaryHousingMaxWeeks": 2,
+        "temporaryHousingBudgetManwon": 100,
+        "temporaryHousingWeeklyCostManwon": 40
+      },
+      "market": {"contractMonth": "2024-08", "guCode": "11440", "buildingUse": "오피스텔", "leaseType": "monthly"},
+      "checkpoints": {"ownershipAndAuthority": "verified", "rightsAndEncumbrances": "conflict", "depositProtectionEligibility": "verified", "contractTerms": "verified"},
+      "policy": {"minimumAffordabilityRate": 0.8, "verificationLeadWeeks": 2}
+    }
+  ]
+}

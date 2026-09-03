@@ -12,6 +12,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .manifest import file_entry, sha256_file, validate_snapshot
+from .model_v0 import run_scenario_matrix
 from .replay import as_receipt_filter_counterfactual, audit_replay_inputs, run_historical_replay
 from .rtms import fetch_rtms, rolling_months, service_key_from_env
 from .seoul_rents import build_monthly_aggregates, load_acquisition_ledger, publish_monthly_snapshot
@@ -482,6 +483,46 @@ def command_receipt_filter_sensitivity(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_minimum_world_model(args: argparse.Namespace) -> int:
+    snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
+    scenario_file = Path(args.scenario_file).expanduser().resolve()
+    output = Path(args.output).expanduser().resolve()
+    if output.exists():
+        raise SystemExit(f"world-model output is immutable: {output}")
+    known_sources = {
+        item["id"]: item for item in load_catalog()["datasets"]
+        if isinstance(item, dict) and item.get("id")
+    }
+    errors = validate_snapshot(snapshot_dir, known_sources)
+    if errors:
+        raise SystemExit("snapshot validation failed: " + "; ".join(errors))
+    manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
+    entry = next(
+        (item for item in manifest["files"] if item.get("usage") == "historical_time_sliced_distribution"),
+        None,
+    )
+    if entry is None:
+        raise SystemExit("snapshot has no historical time-sliced distribution")
+    market_path = snapshot_dir / entry["path"]
+    market_payload = json.loads(market_path.read_text(encoding="utf-8"))
+    specification = json.loads(scenario_file.read_text(encoding="utf-8"))
+    result = run_scenario_matrix(market_payload, specification)
+    result.update({
+        "inputSnapshot": manifest["snapshot_id"],
+        "inputSnapshotSha256": sha256_file(market_path),
+        "scenarioFileSha256": sha256_file(scenario_file),
+        "modelCodeSha256": sha256_file(ROOT / "worldmodel_data" / "model_v0.py"),
+    })
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
+        json.dump(result, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    os.replace(temporary, output)
+    print(output)
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(prog="nestlinker-data")
     sub = result.add_subparsers(dest="command", required=True)
@@ -521,6 +562,13 @@ def parser() -> argparse.ArgumentParser:
     sensitivity.add_argument("--years", type=int, nargs="+", required=True)
     sensitivity.add_argument("--minimum-count", type=int, default=30)
     sensitivity.set_defaults(handler=command_receipt_filter_sensitivity)
+    minimum_model = sub.add_parser(
+        "minimum-world-model", help="run a deterministic mechanism-only renter decision model"
+    )
+    minimum_model.add_argument("--snapshot-dir", required=True)
+    minimum_model.add_argument("--scenario-file", required=True)
+    minimum_model.add_argument("--output", required=True)
+    minimum_model.set_defaults(handler=command_minimum_world_model)
     return result
 
 

@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "minimum-world-model-v0",
+  "claimStatus": "mechanism_test_only_not_calibrated",
+  "scenarioCount": 9,
+  "masterSeed": 20260903,
+  "drawsPerScenario": 5000,
+  "actionCounts": {
+    "adjust_budget_or_market_constraints": 2,
+    "escalate_to_licensed_professional": 1,
+    "proceed_to_human_contract_review": 2,
+    "use_bounded_temporary_housing_and_verify": 4
+  },
+  "results": [
+    {
+      "schemaVersion": 1,
+      "scenarioId": "gwanak-high-budget-1w-missing-terms",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "use_bounded_temporary_housing_and_verify",
+      "requiredActions": [
+        "use_bounded_temporary_housing",
+        "complete_real_world_checkpoints"
+      ],
+      "nextCheckpoint": "contractTerms",
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": true,
+        "depositExposureConstraintSatisfied": true,
+        "mandatoryCheckpointsSatisfied": false,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [
+          "contractTerms"
+        ],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 12000,
+            "maximumDepositExposureManwon": 10000,
+            "monthlyHousingBudgetManwon": 120,
+            "moveInWeeks": 1,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "missing"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 239,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11620",
+            "guName": "관악구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 2000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 35,
+            "monthlyRentMedianManwon": 54,
+            "monthlyRentP75Manwon": 70
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 1.0,
+          "depositExposureExceedanceRate": 0.0,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 7402.46,
+          "monthlyRentP95Manwon": 82.98
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 16097536449005414942,
+        "draws": 5000
+      },
+      "inputSha256": "39ea1d2e8aef103643b8ca89171af346e1826d7f8154e76ec466963d964ab19b"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "gwanak-high-budget-8w-verified",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "proceed_to_human_contract_review",
+      "requiredActions": [
+        "proceed_to_human_contract_review"
+      ],
+      "nextCheckpoint": null,
+      "safetyGate": {
+        "passes": true,
+        "cashConstraintSatisfied": true,
+        "depositExposureConstraintSatisfied": true,
+        "mandatoryCheckpointsSatisfied": true,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 12000,
+            "maximumDepositExposureManwon": 10000,
+            "monthlyHousingBudgetManwon": 120,
+            "moveInWeeks": 8,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "verified"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 239,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11620",
+            "guName": "관악구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 2000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 35,
+            "monthlyRentMedianManwon": 54,
+            "monthlyRentP75Manwon": 70
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 1.0,
+          "depositExposureExceedanceRate": 0.0,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 7402.46,
+          "monthlyRentP95Manwon": 82.98
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 16097536449005414942,
+        "draws": 5000
+      },
+      "inputSha256": "8201304be470e9ab6ba3061b58f9b179170ee8c6d2840d4b6fa2c6e77d070660"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "gwanak-low-budget-1w-missing-terms",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "use_bounded_temporary_housing_and_verify",
+      "requiredActions": [
+        "use_bounded_temporary_housing",
+        "adjust_budget_or_market_constraints",
+        "complete_real_world_checkpoints"
+      ],
+      "nextCheckpoint": "contractTerms",
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": false,
+        "depositExposureConstraintSatisfied": false,
+        "mandatoryCheckpointsSatisfied": false,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [
+          "contractTerms"
+        ],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 4000,
+            "maximumDepositExposureManwon": 3000,
+            "monthlyHousingBudgetManwon": 90,
+            "moveInWeeks": 1,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "missing"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 239,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11620",
+            "guName": "관악구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 2000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 35,
+            "monthlyRentMedianManwon": 54,
+            "monthlyRentP75Manwon": 70
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 0.5822,
+          "depositExposureExceedanceRate": 0.4178,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 7402.46,
+          "monthlyRentP95Manwon": 82.98
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 16097536449005414942,
+        "draws": 5000
+      },
+      "inputSha256": "663dcec5f2dfaf0d0347842d8c7dae367713c173b02883ea620c3cdb1668d840"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "gwanak-low-budget-8w-verified",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "adjust_budget_or_market_constraints",
+      "requiredActions": [
+        "adjust_budget_or_market_constraints"
+      ],
+      "nextCheckpoint": null,
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": false,
+        "depositExposureConstraintSatisfied": false,
+        "mandatoryCheckpointsSatisfied": true,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 4000,
+            "maximumDepositExposureManwon": 3000,
+            "monthlyHousingBudgetManwon": 90,
+            "moveInWeeks": 8,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "verified"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 239,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11620",
+            "guName": "관악구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 2000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 35,
+            "monthlyRentMedianManwon": 54,
+            "monthlyRentP75Manwon": 70
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 0.5822,
+          "depositExposureExceedanceRate": 0.4178,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 7402.46,
+          "monthlyRentP95Manwon": 82.98
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 16097536449005414942,
+        "draws": 5000
+      },
+      "inputSha256": "513e347ae15a336fde5627c502393a87798f948c41056e1082e716adc4939b45"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "mapo-high-budget-1w-missing-terms",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "use_bounded_temporary_housing_and_verify",
+      "requiredActions": [
+        "use_bounded_temporary_housing",
+        "complete_real_world_checkpoints"
+      ],
+      "nextCheckpoint": "contractTerms",
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": true,
+        "depositExposureConstraintSatisfied": true,
+        "mandatoryCheckpointsSatisfied": false,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [
+          "contractTerms"
+        ],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 12000,
+            "maximumDepositExposureManwon": 10000,
+            "monthlyHousingBudgetManwon": 120,
+            "moveInWeeks": 1,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "missing"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 301,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11440",
+            "guName": "마포구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 1000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 50,
+            "monthlyRentMedianManwon": 67,
+            "monthlyRentP75Manwon": 80
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 1.0,
+          "depositExposureExceedanceRate": 0.0,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 8224.17,
+          "monthlyRentP95Manwon": 90.71
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 3508112594383989822,
+        "draws": 5000
+      },
+      "inputSha256": "c2846624e7c8f7e8aa5c604eef63f799af95a3069c982228c056bddabbe455bc"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "mapo-high-budget-8w-conflicting-rights",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "escalate_to_licensed_professional",
+      "requiredActions": [
+        "escalate_to_licensed_professional"
+      ],
+      "nextCheckpoint": "rightsAndEncumbrances",
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": true,
+        "depositExposureConstraintSatisfied": true,
+        "mandatoryCheckpointsSatisfied": false,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [
+          "rightsAndEncumbrances"
+        ],
+        "conflictingCheckpoints": [
+          "rightsAndEncumbrances"
+        ]
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 12000,
+            "maximumDepositExposureManwon": 10000,
+            "monthlyHousingBudgetManwon": 120,
+            "moveInWeeks": 8,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "conflict",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "verified"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 301,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11440",
+            "guName": "마포구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 1000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 50,
+            "monthlyRentMedianManwon": 67,
+            "monthlyRentP75Manwon": 80
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 1.0,
+          "depositExposureExceedanceRate": 0.0,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 8224.17,
+          "monthlyRentP95Manwon": 90.71
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 3508112594383989822,
+        "draws": 5000
+      },
+      "inputSha256": "cae3886d42f7314e1d98586e2068bf225e67764a9751b9eb385c088b25cfd36e"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "mapo-high-budget-8w-verified",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "proceed_to_human_contract_review",
+      "requiredActions": [
+        "proceed_to_human_contract_review"
+      ],
+      "nextCheckpoint": null,
+      "safetyGate": {
+        "passes": true,
+        "cashConstraintSatisfied": true,
+        "depositExposureConstraintSatisfied": true,
+        "mandatoryCheckpointsSatisfied": true,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 12000,
+            "maximumDepositExposureManwon": 10000,
+            "monthlyHousingBudgetManwon": 120,
+            "moveInWeeks": 8,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "verified"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 301,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11440",
+            "guName": "마포구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 1000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 50,
+            "monthlyRentMedianManwon": 67,
+            "monthlyRentP75Manwon": 80
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 1.0,
+          "depositExposureExceedanceRate": 0.0,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 8224.17,
+          "monthlyRentP95Manwon": 90.71
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 3508112594383989822,
+        "draws": 5000
+      },
+      "inputSha256": "62a920f4e08fe84fab6ff14f11df09a6c36947d0d829333e00c84fd9fbf92b65"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "mapo-low-budget-1w-missing-terms",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "use_bounded_temporary_housing_and_verify",
+      "requiredActions": [
+        "use_bounded_temporary_housing",
+        "adjust_budget_or_market_constraints",
+        "complete_real_world_checkpoints"
+      ],
+      "nextCheckpoint": "contractTerms",
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": false,
+        "depositExposureConstraintSatisfied": false,
+        "mandatoryCheckpointsSatisfied": false,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [
+          "contractTerms"
+        ],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 4000,
+            "maximumDepositExposureManwon": 3000,
+            "monthlyHousingBudgetManwon": 90,
+            "moveInWeeks": 1,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "missing"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 301,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11440",
+            "guName": "마포구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 1000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 50,
+            "monthlyRentMedianManwon": 67,
+            "monthlyRentP75Manwon": 80
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 0.5796,
+          "depositExposureExceedanceRate": 0.3834,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 8224.17,
+          "monthlyRentP95Manwon": 90.71
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 3508112594383989822,
+        "draws": 5000
+      },
+      "inputSha256": "b2d7eaf2868f6836667a133a3482ca4ca1af93fc23f9851e3e27bd11bf69943f"
+    },
+    {
+      "schemaVersion": 1,
+      "scenarioId": "mapo-low-budget-8w-verified",
+      "claimStatus": "mechanism_test_only_not_calibrated",
+      "recommendedAction": "adjust_budget_or_market_constraints",
+      "requiredActions": [
+        "adjust_budget_or_market_constraints"
+      ],
+      "nextCheckpoint": null,
+      "safetyGate": {
+        "passes": false,
+        "cashConstraintSatisfied": false,
+        "depositExposureConstraintSatisfied": false,
+        "mandatoryCheckpointsSatisfied": true,
+        "housingContinuityFallbackSatisfied": true,
+        "unresolvedCheckpoints": [],
+        "conflictingCheckpoints": []
+      },
+      "scenarioInputs": {
+        "profile": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "cashBudgetManwon": 4000,
+            "maximumDepositExposureManwon": 3000,
+            "monthlyHousingBudgetManwon": 90,
+            "moveInWeeks": 8,
+            "temporaryHousingMaxWeeks": 2,
+            "temporaryHousingBudgetManwon": 100,
+            "temporaryHousingWeeklyCostManwon": 40
+          },
+          "limitation": "Test profile, not an observed person."
+        },
+        "checkpoints": {
+          "evidenceGrade": "synthetic",
+          "values": {
+            "ownershipAndAuthority": "verified",
+            "rightsAndEncumbrances": "verified",
+            "depositProtectionEligibility": "verified",
+            "contractTerms": "verified"
+          },
+          "limitation": "Exercise state, not verification of a real property or contract."
+        },
+        "policy": {
+          "evidenceGrade": "modeled",
+          "values": {
+            "minimumAffordabilityRate": 0.8,
+            "verificationLeadWeeks": 2
+          },
+          "limitation": "Uncalibrated product policy parameters for mechanism testing."
+        }
+      },
+      "evidence": {
+        "observed": {
+          "evidenceGrade": "observed",
+          "sourceDataLabel": "derived_observed",
+          "source": "seoul-rental-price-files",
+          "sourceGeneratedAt": "2026-09-03T00:47:52.595824+00:00",
+          "sourceRecordCount": 301,
+          "marketCell": {
+            "contractMonth": "2024-08",
+            "guCode": "11440",
+            "guName": "마포구",
+            "buildingUse": "오피스텔",
+            "leaseType": "monthly"
+          },
+          "quantileAnchorsManwon": {
+            "depositP25Manwon": 1000,
+            "depositMedianManwon": 1000,
+            "depositP75Manwon": 5000,
+            "monthlyRentP25Manwon": 50,
+            "monthlyRentMedianManwon": 67,
+            "monthlyRentP75Manwon": 80
+          }
+        },
+        "modeled": {
+          "evidenceGrade": "modeled",
+          "affordabilityRate": 0.5796,
+          "depositExposureExceedanceRate": 0.3834,
+          "limitation": "Policy proxy over synthetic price draws; not deposit-loss or contract-harm probability."
+        },
+        "synthetic": {
+          "evidenceGrade": "synthetic",
+          "method": "piecewise_linear_quantile_stress_draws",
+          "limitation": "Draws independently interpolate and extrapolate deposit and rent marginals from aggregate quantiles; they do not preserve their joint distribution and are not listings or calibrated forecasts.",
+          "depositP95Manwon": 8224.17,
+          "monthlyRentP95Manwon": 90.71
+        }
+      },
+      "reproducibility": {
+        "modelVersion": "minimum-world-model-v0",
+        "seed": 3508112594383989822,
+        "draws": 5000
+      },
+      "inputSha256": "e957d00687a12d22efb0eb45ffc22e47c894b7c2ac7f518809ab0569b2f207d7"
+    }
+  ],
+  "nonClaims": [
+    "No result estimates real deposit-loss or contract-harm probability.",
+    "No action is a legal conclusion or instruction to sign a real contract.",
+    "Historical aggregate price bands do not represent current inventory."
+  ],
+  "inputSnapshot": "seoul-rental-history-2026-09-03",
+  "inputSnapshotSha256": "ef64ac1297ede15c411c3712e61f4495909856ec0cbaee71a8c1c1261602aadc",
+  "scenarioFileSha256": "146d877b77b50d59d27a13853cd53301a8996ee869289e6a435fb493345c9ff5",
+  "modelCodeSha256": "ff39e624084ee254b8da8d26e2ce8380757107c5434f601246df74436f836efa"
+}
