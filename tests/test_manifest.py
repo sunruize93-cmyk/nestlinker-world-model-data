@@ -145,6 +145,24 @@ class ManifestTests(unittest.TestCase):
             }]}), encoding="utf-8")
             self.assertTrue(any("Korean phone" in item for item in validate_published_file(gosiwon)))
 
+    def test_rental_history_rejects_invalid_counts_months_and_quantiles(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "seoul-rental-monthly.json"
+            path.write_text(json.dumps({"records": [{
+                "contractYear": 2024, "contractMonth": "2025-13", "guCode": "11110",
+                "guName": "종로구", "buildingUse": "단독다가구", "leaseType": "monthly",
+                "count": 0, "depositP25Manwon": 2000, "depositMedianManwon": 1000,
+                "depositP75Manwon": 1500, "monthlyRentP25Manwon": 60,
+                "monthlyRentMedianManwon": 50, "monthlyRentP75Manwon": 55,
+            }]}), encoding="utf-8")
+
+            errors = validate_published_file(path)
+
+            self.assertTrue(any("contractMonth" in item for item in errors))
+            self.assertTrue(any("count must be at least 10" in item for item in errors))
+            self.assertTrue(any("deposit quantiles" in item for item in errors))
+            self.assertTrue(any("rent quantiles" in item for item in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

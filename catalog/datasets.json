@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-01",
+  "updated_at": "2026-09-03",
   "scope": "Public data useful to foreign renters in Korea; source discovery is broad, snapshot admission is strict.",
   "datasets": [
     {
@@ -62,6 +62,22 @@
       "status": "cataloged",
       "privacy": "the official API excludes unit details; retain only decision-relevant fields",
       "quality_notes": "reported contracts can be corrected or cancelled; preserve multiplicity and contract status fields"
+    },
+    {
+      "id": "seoul-rental-price-files",
+      "category": "market",
+      "title": "首尔市房地产租赁价格年度文件",
+      "provider": "首尔特别市",
+      "landing_url": "https://data.seoul.go.kr/dataList/OA-21276/A/1/datasetView.do",
+      "discovered_at": "2026-09-03",
+      "access": "public_download",
+      "license": "kogl-type-1-attribution-commercial-and-modification-allowed",
+      "geography": "Seoul, district and legal-dong source detail",
+      "cadence": "daily source updates with annual downloadable files",
+      "model_use": ["historical deposit and rent bands", "time-split replay", "property-type comparison"],
+      "status": "seeded",
+      "privacy": "publish only district/month/building-use/lease-type aggregates; remove address, parcel, floor and building name",
+      "quality_notes": "retrospective contract-date data can be revised; annual files include out-of-year records, and the 2025 file observed on 2026-09-03 was quarantined for systemic exact duplicates"
     },
     {
       "id": "reb-rent-price-index",
