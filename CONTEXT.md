@@ -40,6 +40,14 @@ _Avoid_: successful booking, best property
 A financial, contractual, safety, timing, or access loss that a reasonable pre-rental check or decision could have reduced.
 _Avoid_: bad luck, user error
 
+**Safety-First Objective**:
+A lexicographic decision rule that admits only safety-feasible choices, minimizes deposit and contract harm before comparing housing probability, and considers speed or convenience last. A gain in a lower-priority outcome cannot compensate for a safety regression.
+_Avoid_: overall risk score, engagement-optimized score
+
+**Safety-Feasible Choice**:
+A choice that stays within the renter's declared cash and loss limits, preserves a time- and cost-bounded housing-continuity fallback, and does not skip a mandatory Real-World Checkpoint. When no such choice exists, the valid output is to pause, verify, escalate, or use a bounded temporary fallback.
+_Avoid_: guaranteed-safe choice, approved property
+
 **Decision Regret**:
 The gap between the outcome of a chosen action and the best feasible action available under the same information and constraints.
 _Avoid_: game score, model accuracy
