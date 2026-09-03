@@ -191,6 +191,11 @@ class MinimumWorldModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unexpected profile fields"):
             run_minimum_world_model(market_payload(), personal_data)
 
+        personal_identifier = deepcopy(safe_scenario())
+        personal_identifier["scenarioId"] = "student@example.com"
+        with self.assertRaisesRegex(ValueError, "safe slug"):
+            run_minimum_world_model(market_payload(), personal_identifier)
+
         noisy_market = deepcopy(safe_scenario())
         noisy_market["market"]["note"] = "changes-no-behavior"
         with self.assertRaisesRegex(ValueError, "unexpected market fields"):

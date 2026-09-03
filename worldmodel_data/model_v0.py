@@ -143,8 +143,8 @@ def run_minimum_world_model(
         raise ValueError("market payload generatedAt must include a timezone")
     market = _selected_market(market_payload, market_request)
     scenario_id = scenario.get("scenarioId")
-    if not isinstance(scenario_id, str) or not scenario_id:
-        raise ValueError("scenarioId must be a non-empty string")
+    if not isinstance(scenario_id, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", scenario_id):
+        raise ValueError("scenarioId must be a non-identifying lowercase safe slug")
     seed_value = simulation.get("seed")
     draws_value = simulation.get("draws")
     if isinstance(seed_value, bool) or not isinstance(seed_value, int):
