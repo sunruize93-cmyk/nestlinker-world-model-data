@@ -12,7 +12,10 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .manifest import file_entry, sha256_file, validate_snapshot
+from .model_v0 import run_scenario_matrix, scenario_specification_sha256
+from .replay import as_receipt_filter_counterfactual, audit_replay_inputs, run_historical_replay
 from .rtms import fetch_rtms, rolling_months, service_key_from_env
+from .seoul_rents import build_monthly_aggregates, load_acquisition_ledger, publish_monthly_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "catalog" / "datasets.json"
@@ -338,6 +341,200 @@ def command_fetch_rtms(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_publish_seoul_history(args: argparse.Namespace) -> int:
+    snapshot_date = _validated_snapshot_date(args.snapshot_date)
+    raw_dir = Path(args.raw_dir).expanduser().resolve()
+    archives = {year: raw_dir / f"seoul-rents-{year}.zip" for year in args.years}
+    if _git_value(ROOT, "status", "--porcelain"):
+        raise SystemExit("refusing to publish from a dirty worktree; commit transformation code first")
+    target = ROOT / "data" / "snapshots" / snapshot_date / "seoul-rental-history"
+    publish_monthly_snapshot(
+        archives,
+        target,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        input_commit=_git_value(ROOT, "rev-parse", "HEAD"),
+        acquisitions=load_acquisition_ledger(Path(args.acquisition_ledger).expanduser().resolve()),
+    )
+    print(target)
+    return 0
+
+
+def command_historical_replay(args: argparse.Namespace) -> int:
+    snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
+    output = Path(args.output).expanduser().resolve()
+    if output.exists():
+        raise SystemExit(f"replay output is immutable: {output}")
+    known_sources = {
+        item["id"]: item for item in load_catalog()["datasets"]
+        if isinstance(item, dict) and item.get("id")
+    }
+    validation_errors = validate_snapshot(snapshot_dir, known_sources)
+    if validation_errors:
+        raise SystemExit("snapshot validation failed: " + "; ".join(validation_errors))
+    audit = audit_replay_inputs(snapshot_dir)
+    if audit["statistical_replay"] != "supported":
+        raise SystemExit(f"snapshot cannot support statistical replay: {audit['blockers']}")
+    manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
+    data_entry = next(
+        (entry for entry in manifest["files"] if entry.get("usage") == "historical_time_sliced_distribution"),
+        None,
+    )
+    if data_entry is None:
+        raise SystemExit("snapshot has no historical time-sliced distribution")
+    data_path = snapshot_dir / data_entry["path"]
+    payload = json.loads(data_path.read_text(encoding="utf-8"))
+    result = {
+        "schemaVersion": 1,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "inputSnapshot": manifest["snapshot_id"],
+        "inputSha256": sha256_file(data_path),
+        "inputAudit": audit,
+        "runs": [
+            run_historical_replay(payload, min_group_count=value)
+            for value in args.minimum_counts
+        ],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
+        json.dump(result, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    os.replace(temporary, output)
+    print(output)
+    return 0
+
+
+def command_receipt_filter_sensitivity(args: argparse.Namespace) -> int:
+    raw_dir = Path(args.raw_dir).expanduser().resolve()
+    output = Path(args.output).expanduser().resolve()
+    if output.exists():
+        raise SystemExit(f"sensitivity output is immutable: {output}")
+    if _git_value(ROOT, "status", "--porcelain"):
+        raise SystemExit("refusing to publish from a dirty worktree; commit transformation code first")
+    archives = {year: raw_dir / f"seoul-rents-{year}.zip" for year in args.years}
+    acquisitions = load_acquisition_ledger(Path(args.acquisition_ledger).expanduser().resolve())
+    input_sources = []
+    for year, archive in sorted(archives.items()):
+        acquisition = acquisitions.get(year)
+        if acquisition is None:
+            raise SystemExit(f"missing acquisition record for {year}")
+        digest = sha256_file(archive)
+        if acquisition.get("sha256") != digest or acquisition.get("bytes") != archive.stat().st_size:
+            raise SystemExit(f"acquisition record does not match archive for {year}")
+        input_sources.append({
+            "contractYear": year,
+            "sha256": digest,
+            "bytes": archive.stat().st_size,
+            "retrievedAt": acquisition.get("retrieved_at"),
+        })
+    filtered_payload = build_monthly_aggregates(
+        archives, minimum_group_count=10, exclude_receipt_year_mismatch=True
+    )
+    included_payload = build_monthly_aggregates(
+        archives, minimum_group_count=10, exclude_receipt_year_mismatch=False
+    )
+    filtered = run_historical_replay(filtered_payload, min_group_count=args.minimum_count)
+    included = as_receipt_filter_counterfactual(
+        run_historical_replay(included_payload, min_group_count=args.minimum_count)
+    )
+    metrics = ("monthlyLeaseDeposit", "jeonseDeposit", "monthlyRent")
+    comparisons = []
+    for filtered_fold, included_fold in zip(filtered["folds"], included["folds"]):
+        for metric in metrics:
+            comparisons.append({
+                "trainYear": filtered_fold["trainYear"],
+                "testYear": filtered_fold["testYear"],
+                "metric": metric,
+                "wapeAbsoluteDifference": round(abs(
+                    filtered_fold[metric]["weightedAbsolutePercentageError"]
+                    - included_fold[metric]["weightedAbsolutePercentageError"]
+                ), 4),
+                "bandCoverageAbsoluteDifference": round(abs(
+                    filtered_fold[metric]["medianBandCoverage"]
+                    - included_fold[metric]["medianBandCoverage"]
+                ), 4),
+            })
+    result = {
+        "schemaVersion": 1,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "inputCommit": _git_value(ROOT, "rev-parse", "HEAD"),
+        "inputSources": input_sources,
+        "minimumGroupCount": args.minimum_count,
+        "purpose": "receipt-year mismatch filter sensitivity only; not a safety outcome evaluation",
+        "excludedReceiptYearMismatchCount": filtered_payload["excludedReceiptYearMismatch"],
+        "excludedReceiptYearMismatchByContractMonth": filtered_payload[
+            "excludedReceiptYearMismatchByContractMonth"
+        ],
+        "filtered": filtered,
+        "includedForSensitivityOnly": included,
+        "comparisons": comparisons,
+        "maximumWapeAbsoluteDifference": max(item["wapeAbsoluteDifference"] for item in comparisons),
+        "maximumBandCoverageAbsoluteDifference": max(
+            item["bandCoverageAbsoluteDifference"] for item in comparisons
+        ),
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
+        json.dump(result, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    os.replace(temporary, output)
+    print(output)
+    return 0
+
+
+def command_minimum_world_model(args: argparse.Namespace) -> int:
+    snapshot_dir = Path(args.snapshot_dir).expanduser().resolve()
+    scenario_file = Path(args.scenario_file).expanduser().resolve()
+    output = Path(args.output).expanduser().resolve()
+    if output.exists():
+        raise SystemExit(f"world-model output is immutable: {output}")
+    known_sources = {
+        item["id"]: item for item in load_catalog()["datasets"]
+        if isinstance(item, dict) and item.get("id")
+    }
+    errors = validate_snapshot(snapshot_dir, known_sources)
+    if errors:
+        raise SystemExit("snapshot validation failed: " + "; ".join(errors))
+    manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
+    entry = next(
+        (
+            item for item in manifest["files"]
+            if item.get("usage") == "historical_time_sliced_distribution"
+            and item.get("source_id") == "seoul-rental-price-files"
+            and item.get("data_label") == "derived_observed"
+        ),
+        None,
+    )
+    if entry is None:
+        raise SystemExit("snapshot has no historical time-sliced distribution")
+    market_path = snapshot_dir / entry["path"]
+    market_payload = json.loads(market_path.read_text(encoding="utf-8"))
+    market_payload["provenance"] = {
+        "sourceId": entry["source_id"],
+        "dataLabel": entry["data_label"],
+        "usage": entry["usage"],
+    }
+    specification = json.loads(scenario_file.read_text(encoding="utf-8"))
+    result = run_scenario_matrix(market_payload, specification)
+    result.update({
+        "inputSnapshot": manifest["snapshot_id"],
+        "inputDataSha256": sha256_file(market_path),
+        "inputManifestSha256": sha256_file(snapshot_dir / "manifest.json"),
+        "inputCommit": manifest["input_commit"],
+        "scenarioSpecificationSha256": scenario_specification_sha256(specification),
+        "modelCodeSha256": sha256_file(ROOT / "worldmodel_data" / "model_v0.py"),
+    })
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
+        json.dump(result, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    os.replace(temporary, output)
+    print(output)
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(prog="nestlinker-data")
     sub = result.add_subparsers(dest="command", required=True)
@@ -357,6 +554,33 @@ def parser() -> argparse.ArgumentParser:
     rtms.add_argument("--region-snapshot", default="2026-09-01")
     rtms.add_argument("--delay", type=float, default=0.15)
     rtms.set_defaults(handler=command_fetch_rtms)
+    history = sub.add_parser("publish-seoul-history", help="publish privacy-minimal Seoul rental history aggregates")
+    history.add_argument("--raw-dir", required=True)
+    history.add_argument("--snapshot-date", required=True)
+    history.add_argument("--years", type=int, nargs="+", required=True)
+    history.add_argument("--acquisition-ledger", required=True)
+    history.set_defaults(handler=command_publish_seoul_history)
+    replay = sub.add_parser("historical-replay", help="run prior-year aggregate market replay")
+    replay.add_argument("--snapshot-dir", required=True)
+    replay.add_argument("--output", required=True)
+    replay.add_argument("--minimum-counts", type=int, nargs="+", default=[10, 30, 100])
+    replay.set_defaults(handler=command_historical_replay)
+    sensitivity = sub.add_parser(
+        "receipt-filter-sensitivity", help="compare replay with and without receipt-year filtering"
+    )
+    sensitivity.add_argument("--raw-dir", required=True)
+    sensitivity.add_argument("--acquisition-ledger", required=True)
+    sensitivity.add_argument("--output", required=True)
+    sensitivity.add_argument("--years", type=int, nargs="+", required=True)
+    sensitivity.add_argument("--minimum-count", type=int, default=30)
+    sensitivity.set_defaults(handler=command_receipt_filter_sensitivity)
+    minimum_model = sub.add_parser(
+        "minimum-world-model", help="run a deterministic mechanism-only renter decision model"
+    )
+    minimum_model.add_argument("--snapshot-dir", required=True)
+    minimum_model.add_argument("--scenario-file", required=True)
+    minimum_model.add_argument("--output", required=True)
+    minimum_model.set_defaults(handler=command_minimum_world_model)
     return result
 
 

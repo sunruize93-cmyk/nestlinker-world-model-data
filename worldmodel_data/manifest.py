@@ -8,6 +8,11 @@ from typing import Any, Mapping
 
 
 PUBLISHED_RECORD_FIELDS = {
+    "seoul-rental-monthly.json": {
+        "buildingUse", "contractMonth", "contractYear", "count", "depositMedianManwon",
+        "depositP25Manwon", "depositP75Manwon", "guCode", "guName", "leaseType",
+        "monthlyRentMedianManwon", "monthlyRentP25Manwon", "monthlyRentP75Manwon",
+    },
     "rtms-sample.json": {
         "buildYear", "buildingName", "contractTerm", "dealDate", "depositManwon",
         "exclusiveAreaSqm", "floor", "guName", "id", "lawdCode", "leaseType",
@@ -31,6 +36,7 @@ PUBLISHED_RECORD_FIELDS = {
     },
 }
 PUBLISHED_RECORD_KEYS = {
+    "seoul-rental-monthly.json": "records",
     "rtms-sample.json": "listings",
     "rtms-summaries.json": "districts",
     "demographics.json": "districts",
@@ -68,6 +74,24 @@ def validate_published_file(path: Path) -> list[str]:
         unexpected = sorted(set(record) - allowed)
         if unexpected:
             errors.append(f"{path}: record {index} has unexpected fields: {unexpected}")
+        if path.name == "seoul-rental-monthly.json":
+            year = record.get("contractYear")
+            month = record.get("contractMonth")
+            if not isinstance(year, int) or not isinstance(month, str) or not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])", month) or month[:4] != str(year):
+                errors.append(f"{path}: record {index} has invalid contractMonth")
+            if not isinstance(record.get("count"), int) or record["count"] < 10:
+                errors.append(f"{path}: record {index} count must be at least 10")
+            if not isinstance(record.get("guCode"), str) or not re.fullmatch(r"\d{5}", record["guCode"]):
+                errors.append(f"{path}: record {index} has invalid guCode")
+            if record.get("leaseType") not in {"monthly", "jeonse"}:
+                errors.append(f"{path}: record {index} has invalid leaseType")
+            for label, fields in (
+                ("deposit", ("depositP25Manwon", "depositMedianManwon", "depositP75Manwon")),
+                ("rent", ("monthlyRentP25Manwon", "monthlyRentMedianManwon", "monthlyRentP75Manwon")),
+            ):
+                values = [record.get(field) for field in fields]
+                if not all(isinstance(value, (int, float)) and value >= 0 for value in values) or values != sorted(values):
+                    errors.append(f"{path}: record {index} has invalid {label} quantiles")
 
     def walk(value: object, location: str) -> None:
         if isinstance(value, dict):
@@ -279,6 +303,19 @@ def validate_snapshot(
         if actual_count is None or entry.get("record_count") != actual_count:
             errors.append(f"{target}: record_count mismatch")
         errors.extend(validate_published_file(target))
+        if target.name == "seoul-rental-monthly.json":
+            minimum_cell_count = entry.get("minimum_cell_count")
+            if not isinstance(minimum_cell_count, int) or minimum_cell_count < 10:
+                errors.append(f"{manifest_path}: {relative} minimum_cell_count must be at least 10")
+            else:
+                payload = json.loads(target.read_text(encoding="utf-8"))
+                if any(
+                    not isinstance(record.get("count"), int)
+                    or record["count"] < minimum_cell_count
+                    for record in payload.get("records", [])
+                    if isinstance(record, dict)
+                ):
+                    errors.append(f"{manifest_path}: {relative} has records below minimum_cell_count")
         required_file = {"data_label", "geography", "temporal_coverage", "usage", "limitations"}
         missing_file = sorted(required_file - entry.keys())
         if missing_file:

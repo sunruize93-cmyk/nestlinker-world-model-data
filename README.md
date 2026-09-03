@@ -4,7 +4,7 @@
 
 ## 当前覆盖
 
-截至 2026-09-01，目录登记 33 个公开来源；首个可复核快照包含 6 个文件、9,935 条记录。覆盖数量、限制与下一批采集顺序见 `docs/COVERAGE.md`。
+截至 2026-09-03，目录登记 34 个公开来源；两个可复核快照包含 7 个数据文件、17,060 条发布记录。覆盖数量、限制与下一批采集顺序见 `docs/COVERAGE.md`。
 
 - 租赁成交：国土交通部 RTMS，按住宅类型、区、月份采集。
 - 人口与外国人：行政安全部居民人口、法务部登记/居所外国人统计。
@@ -24,6 +24,47 @@ python3 -m unittest discover -s tests -v
 python3 -m worldmodel_data validate
 python3 -m worldmodel_data catalog --category market
 ```
+
+首尔租赁历史回放使用官方年度文件。原始 ZIP 保存在 gitignore 的 `data/raw/`，聚合时删除地址、地号、楼名和楼层：
+
+```bash
+python3 -m worldmodel_data publish-seoul-history \
+  --raw-dir data/raw/seoul-rental-files \
+  --acquisition-ledger data/acquisitions/2026-09-03/seoul-rental-files.json \
+  --snapshot-date 2026-09-03 \
+  --years 2022 2023 2024
+
+python3 -m worldmodel_data historical-replay \
+  --snapshot-dir data/snapshots/2026-09-03/seoul-rental-history \
+  --output docs/research/historical-replay-results.json \
+  --minimum-counts 10 30 100
+```
+
+复核受理年过滤的年末选择偏差（输出为不可覆盖的机器可读产物）：
+
+```bash
+python3 -m worldmodel_data receipt-filter-sensitivity \
+  --raw-dir data/raw/seoul-rental-files \
+  --acquisition-ledger data/acquisitions/2026-09-03/seoul-rental-files.json \
+  --output docs/research/receipt-filter-sensitivity.json \
+  --years 2022 2023 2024 \
+  --minimum-count 30
+```
+
+回放只检验区级历史价格带的稳定性，不检验实时房源、个体合同安全、押金能否返还或外国租客摩擦。
+
+运行最小世界模型的固定情景矩阵：
+
+```bash
+python3 -m worldmodel_data minimum-world-model \
+  --snapshot-dir data/snapshots/2026-09-03/seoul-rental-history \
+  --scenario-file docs/model/MINIMUM_WORLD_MODEL_SCENARIOS_V0.json \
+  --output /tmp/minimum-world-model-v0.json
+```
+
+已发布的参考输出见 `docs/model/MINIMUM_WORLD_MODEL_RUN_V0.json`。该模型只用于验证机制门槛、行动顺序和参数单调性；完整 `safetyGate` 固定为 `unknown_missing_outcome_calibration`。`affordabilityRate` 与 `depositExposureExceedanceRate` 是历史聚合价格带上的合成压力测试，不是当前找房成功率或押金损失概率。
+
+仓库保存可校验的聚合快照与机器结果；年度原始 ZIP 因包含不必要的物业明细而不提交 Git。manifest 固定其哈希，但官方文件可能更新，因此新的 checkout 可以复跑已发布聚合上的回放，未必能重新取得字节完全相同的原始 ZIP。异常文件证据保存在 `data/quarantine/`。
 
 从 NestLinker 主仓导入已有的公开数据派生快照：
 
